@@ -1,0 +1,5 @@
+aiosqlite>=0.17.0
+colorama>=0.4.6
+discord.py>=2.1.0
+pyfiglet>=0.8.post1
+python-dotenv>=0.21.0
