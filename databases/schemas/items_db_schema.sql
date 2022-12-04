@@ -50,6 +50,8 @@ This query would attach the databases database1.db and database2.db as db1 and d
 and then use a JOIN clause to combine data from the table1 and table2 tables based on a common column1 in each table.
 */
 
+-- https://minecraft.fandom.com/wiki/Minecraft_Dungeons:Item
+
 BEGIN TRANSACTION;
 
 
