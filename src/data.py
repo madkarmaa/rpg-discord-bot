@@ -108,8 +108,8 @@ class ItemsDatabaseManager(DatabaseManager):
             SELECT {table}_specials.* FROM {table}
             INNER JOIN {table}_specials
             ON {table}.id = {table}_specials.is_from
-            WHERE melee.name = "{base_weapon}"
-        """)
+            WHERE melee.name = ?
+        """, (base_weapon,))
 
         columns = [column[0] for column in cursor.description]
         rows = [dict(zip(columns, row)) for row in await cursor.fetchall()]
