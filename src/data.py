@@ -100,7 +100,7 @@ class ItemsDatabaseManager(DatabaseManager):
             WHERE melee.name = "{base_item}"
         """)
 
-        columns = [description[0] for description in cursor.description]
+        columns = [column[0] for column in cursor.description]
         rows = [dict(zip(columns, row)) for row in await cursor.fetchall()]
 
         await cursor.close()
