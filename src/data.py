@@ -91,7 +91,7 @@ class ItemsDatabaseManager(DatabaseManager):
         Function to get all the special variants of a given base weapon.
 
         Args:
-            `table` (`str`): The table to get the data from.
+            `table` (`str`): The table to get the data from (melee, ranged, ...).
             
             `base_weapon` (`str`): The name of the base weapon to get all its special variants.
 
