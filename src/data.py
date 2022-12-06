@@ -86,10 +86,21 @@ class ItemsDatabaseManager(DatabaseManager):
         super().__init__(database_file_path=database_file_path, database_schema_path=database_schema_path)
 
 
-    async def get_weapons_specials(self, table: str, base_item: str) -> List[Dict[str, Any]]:
+    async def get_weapons_specials(self, table: str, base_weapon: str) -> List[Dict[str, Any]]:
+        """`Async method`\n
+        Function to get all the special variants of a given base weapon.
+
+        Args:
+            `table` (`str`): The table to get the data from (please make sure the base table and the specials table are called `{weapon_type}` and `{weapon_type}_specials`).
+            
+            `base_weapon` (`str`): The name of the base weapon to get all its special variants (from `weapon_type` table).
+
+        Returns:
+            `List[Dict[str, Any]]`: A list of data.
+        """        
 
         table = re.sub(r"[^a-zA-Z0-9_\-]", "", table)
-        base_item = re.sub(r"[^a-zA-Z0-9_\-]", "", base_item)
+        base_weapon = re.sub(r"[^a-zA-Z0-9_\-]", "", base_weapon)
 
         cursor: aiosqlite.Cursor = await self._create_cursor()
 
@@ -97,7 +108,7 @@ class ItemsDatabaseManager(DatabaseManager):
             SELECT {table}_specials.* FROM {table}
             INNER JOIN {table}_specials
             ON {table}.id = {table}_specials.is_from
-            WHERE melee.name = "{base_item}"
+            WHERE melee.name = "{base_weapon}"
         """)
 
         columns = [column[0] for column in cursor.description]
