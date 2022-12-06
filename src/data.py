@@ -85,7 +85,7 @@ class ItemsDatabaseManager(DatabaseManager):
     def __init__(self, *, database_file_path: str, database_schema_path: str | None = None):
         super().__init__(database_file_path=database_file_path, database_schema_path=database_schema_path)
 
-    
+
     async def get_weapons_specials(self, table: str, base_item: str) -> List[Dict[str, Any]]:
 
         table = re.sub(r"[^a-zA-Z0-9_\-]", "", table)
