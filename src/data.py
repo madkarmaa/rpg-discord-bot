@@ -91,9 +91,9 @@ class ItemsDatabaseManager(DatabaseManager):
         Function to get all the special variants of a given base weapon.
 
         Args:
-            `table` (`str`): The table to get the data from (please make sure the base table and the specials table are called `{weapon_type}` and `{weapon_type}_specials`).
+            `table` (`str`): The table to get the data from.
             
-            `base_weapon` (`str`): The name of the base weapon to get all its special variants (from `weapon_type` table).
+            `base_weapon` (`str`): The name of the base weapon to get all its special variants.
 
         Returns:
             `List[Dict[str, Any]]`: A list of data.
