@@ -28,7 +28,7 @@ client = MyClient(
         database_file_path = "./databases/users.db",
         database_schema_path = "./databases/schemas/users_db_schema.sql"
     ),
-    _data_database_manager = ItemsDatabaseManager(  # TODO set real database manager
+    _data_database_manager = ItemsDatabaseManager(
         database_file_path = "./databases/items.db",
         database_schema_path = "./databases/schemas/items_db_schema.sql"
     ),

@@ -97,12 +97,16 @@ class ItemsDatabaseManager(DatabaseManager):
 
         Returns:
             `List[Dict[str, Any]]`: A list of data.
-        """        
-
-        table = re.sub(r"[^a-zA-Z0-9_\-]", "", table)
-        base_weapon = re.sub(r"[^a-zA-Z0-9_\-]", "", base_weapon)
+        """
 
         cursor: aiosqlite.Cursor = await self._create_cursor()
+
+        # Protection against SQL injections: check if a table exists, else throw an error.
+        await cursor.execute("SELECT name FROM sqlite_master WHERE type = 'table'")
+        table_names = [table_name[0] for table_name in await cursor.fetchall()]
+
+        if table not in table_names:
+            raise ValueError(f"Invalid table name '{table}'")
 
         await cursor.execute(f"""
             SELECT {table}_specials.* FROM {table}
