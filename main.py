@@ -9,7 +9,7 @@ from discord.ext import commands
 from discord.utils import setup_logging
 
 from src.client import MyClient
-from src.data import DatabaseManager
+from src.data import DatabaseManager, ItemsDatabaseManager
 
 load_dotenv()
 
@@ -28,7 +28,7 @@ client = MyClient(
         database_file_path = "./databases/users.db",
         database_schema_path = "./databases/schemas/users_db_schema.sql"
     ),
-    _data_database_manager = DatabaseManager(  # TODO set real database manager
+    _data_database_manager = ItemsDatabaseManager(  # TODO set real database manager
         database_file_path = "./databases/items.db",
         database_schema_path = "./databases/schemas/items_db_schema.sql"
     ),

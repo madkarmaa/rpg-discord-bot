@@ -1,13 +1,13 @@
 import discord
 from discord import Intents
 from discord.ext.commands import Bot
-from typing import Any, List, Type
+from typing import Any, List, Type, Union
 import os
 import logging
 import colorama
 from colorama import Fore, Back, Style
 
-from src.data import DatabaseManager
+from src.data import DatabaseManager, ItemsDatabaseManager
 
 DSLOGGER = logging.getLogger("discord")
 
@@ -31,7 +31,7 @@ class MyClient(Bot):
 
             `TEST_GUILD` (`Type[discord.Object]`): (Optional) Default is `None`. If `_is_testing` is `True`, then it's required. The guild where the client will copy its commands.
     """
-    def __init__(self, *, intents: Intents, _user_database_manager: Type[DatabaseManager], _data_database_manager: Type[DatabaseManager], _extensions_folders: List[str], _is_testing: bool = False, TEST_GUILD: Type[discord.Object] | None = None, **options: Any) -> None:
+    def __init__(self, *, intents: Intents, _user_database_manager: Type[DatabaseManager], _data_database_manager: ItemsDatabaseManager, _extensions_folders: List[str], _is_testing: bool = False, TEST_GUILD: Type[discord.Object] | None = None, **options: Any) -> None:
         # Constructor-required
         self._user_database_manager = _user_database_manager
         self._data_database_manager = _data_database_manager

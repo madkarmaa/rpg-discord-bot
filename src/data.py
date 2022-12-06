@@ -1,7 +1,8 @@
+import re
 import aiosqlite
 import discord
 from os.path import abspath, isfile
-from typing import Type, Any, Optional
+from typing import Type, Any, Optional, List, Dict
 import logging
 
 DSLOGGER = logging.getLogger("discord")
@@ -55,7 +56,7 @@ class DatabaseManager:
             DSLOGGER.log(logging.INFO, "Successfully disconnected from the database.")
 
 
-    async def __create_cursor(self) -> aiosqlite.Cursor:
+    async def _create_cursor(self) -> aiosqlite.Cursor:
         """`Async method`\n
         Internal private method to create a new cursor using the given database connection.
 
@@ -80,134 +81,28 @@ class DatabaseManager:
         await self._database_connection.commit()
 
 
-class UserDatabaseManager(DatabaseManager):
-    def __init__(self, *, database_file_path: str):
-        super().__init__(database_file_path=database_file_path)
+class ItemsDatabaseManager(DatabaseManager):
+    def __init__(self, *, database_file_path: str, database_schema_path: str | None = None):
+        super().__init__(database_file_path=database_file_path, database_schema_path=database_schema_path)
 
-    async def add_user(self, user: int | discord.user.User | discord.member.Member) -> bool:
-        """`Async method`\n
-        Create a new user in the database.
+    
+    async def get_weapons_specials(self, table: str, base_item: str) -> List[Dict[str, Any]]:
 
-        Args:
-            `user` (`int | discord.user.User | discord.member.Member`): The user to add to the database.
+        table = re.sub(r"[^a-zA-Z0-9_\-]", "", table)
+        base_item = re.sub(r"[^a-zA-Z0-9_\-]", "", base_item)
 
+        cursor: aiosqlite.Cursor = await self._create_cursor()
 
-        Returns:
-            `bool`: `True` if successful.
-        """
-        if isinstance(user, (discord.user.User, discord.member.Member)):
-            user = user.id
+        await cursor.execute(f"""
+            SELECT {table}_specials.* FROM {table}
+            INNER JOIN {table}_specials
+            ON {table}.id = {table}_specials.is_from
+            WHERE melee.name = "{base_item}"
+        """)
 
-        async with self.database_connection:
-            with await self.__create_cursor() as cursor:
-                await cursor.execute('INSERT INTO inventory (user_id) VALUES (:user_id)', {'user_id': user})
+        columns = [description[0] for description in cursor.description]
+        rows = [dict(zip(columns, row)) for row in await cursor.fetchall()]
 
-        return True
+        await cursor.close()
 
-
-    async def remove_user(self, user: int | discord.user.User | discord.member.Member) -> bool:
-        """`Async method`\n
-        Remove a user from the database.
-
-        Args:
-            `user` (`int | discord.user.User | discord.member.Member`): The user to be removed from the database.
-
-        Returns:
-            `bool`: `True` if successful.
-        """
-
-        if isinstance(user, (discord.user.User, discord.member.Member)):
-            user = user.id
-
-        async with self.database_connection:
-            with await self.__create_cursor() as cursor:
-                await cursor.execute('DELETE from inventory WHERE user_id = :user_id', {'user_id': user})
-
-        return True
-
-
-    async def fetch(self, user: int | discord.User, items: list[str]) -> dict:
-        """
-        Function to fetch a user's item/s from the database.
-
-        Parameters
-        ----------
-
-        user: `int` | `discord.user.User` | `discord.member.Member`
-            The user to check in the database.
-
-        Returns
-        -------
-        `dict`:
-            The items you've searched and their values.
-
-        Raises
-        ------
-        `sqlite3.OperationalError` | `aiosqlite.OperationalError`:
-            Raised if a column is not found.
-
-        `TypeError`:
-            Raised if the user row is not found.
-
-        Example
-        -------
-        `await fetch(user=user_id, items=['item1', 'item2', 'item3', ...])`
-        """
-
-        if isinstance(user, (discord.user.User, discord.member.Member)):
-            user = user.id
-
-        # TODO check item = db columns to prevent SQL injections.
-
-        data: dict = {}
-
-        for item in items:
-            await self._cursor.execute(f"SELECT {' ,'.join(items)} FROM inventory WHERE user_id = :user_id", {'user_id': user})
-            item: dict = {item: (await self._cursor.fetchone())[0]}
-            data |= item
-
-        return data
-
-
-    async def update(self, user: int | discord.user.User | discord.member.Member, **args) -> bool:
-        """
-        Function to update a user's item/s in the database.
-
-        Parameters
-        ----------
-
-        user: `int` | `discord.user.User` | `discord.member.Member`
-            The user to be updated in the database.
-
-        Returns
-        -------
-        `True` if the function has worked.
-
-        Raises
-        ------
-        `sqlite3.OperationalError` | `aiosqlite.OperationalError`:
-            Raised if a column is not found.
-
-        `TypeError`:
-            Raised if no arguments are provided (`**args`).
-
-        Example
-        -------
-        `await update(user=user_id, item1=100, item2=200, item3=300, ...)`
-        """
-
-        if isinstance(user, (discord.user.User, discord.member.Member)):
-            user = user.id
-
-        if not args:
-            raise TypeError(
-                'Provide at least 1 argument (read the docs for an example)')
-
-        # TODO check args = db columns to prevent SQL injections.
-
-        for arg, value in args.items():
-            await self._cursor.execute(f'UPDATE inventory SET {arg} = :value WHERE user_id = :user_id', {'user_id': user, 'value': value})
-
-        await self.database_connection.commit()
-
-        return True
+        return rows

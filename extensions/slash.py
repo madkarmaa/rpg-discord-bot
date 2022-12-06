@@ -14,6 +14,12 @@ class Slash(commands.Cog):
         """Check the bot's latency."""
         await interaction.response.send_message(f'\U0001f4e1 My latency is **{round(self.bot.latency * 1000)}ms**')
 
+    
+    @app_commands.command()
+    async def test(self, interaction: Interaction):
+        test = await self.bot._data_database_manager.get_weapons_specials("melee", "test1")
+        await interaction.response.send_message(test)
+
 
 async def setup(bot: MyClient):
     await bot.add_cog(Slash(bot))

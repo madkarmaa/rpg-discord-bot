@@ -55,7 +55,7 @@ and then use a JOIN clause to combine data from the table1 and table2 tables bas
 BEGIN TRANSACTION;
 
 
-CREATE TABLE melee (
+CREATE TABLE IF NOT EXISTS melee (
     id                  INTEGER         PRIMARY KEY AUTOINCREMENT,
     name                TEXT            NOT NULL,
     rarity              TEXT            NOT NULL DEFAULT "common, rare", -- Split string later in Python
@@ -65,7 +65,7 @@ CREATE TABLE melee (
     emoji_id            INTEGER         NOT NULL
 );
 
-CREATE TABLE ranged (
+CREATE TABLE IF NOT EXISTS ranged (
     id                  INTEGER         PRIMARY KEY AUTOINCREMENT,
     name                TEXT            NOT NULL,
     rarity              TEXT            NOT NULL DEFAULT "common, rare", -- Split string later in Python
@@ -75,7 +75,7 @@ CREATE TABLE ranged (
     emoji_id            INTEGER         NOT NULL
 );
 
-CREATE TABLE melee_specials (
+CREATE TABLE IF NOT EXISTS melee_specials (
     is_from             INTEGER         NOT NULL,
     name                TEXT            NOT NULL,
     rarity              TEXT            NOT NULL DEFAULT "unique",
@@ -85,7 +85,7 @@ CREATE TABLE melee_specials (
     emoji_id            INTEGER         NOT NULL
 );
 
-CREATE TABLE ranged_specials (
+CREATE TABLE IF NOT EXISTS ranged_specials (
     is_from             INTEGER         NOT NULL,
     name                TEXT            NOT NULL,
     rarity              TEXT            NOT NULL DEFAULT "unique",
