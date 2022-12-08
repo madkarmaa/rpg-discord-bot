@@ -4,7 +4,7 @@ import colorama
 from colorama import Fore, Back, Style
 import logging
 
-from src.client import MyClient
+from custom.client import MyClient
 
 colorama.init()
 DSLOGGER = logging.getLogger("discord")

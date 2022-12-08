@@ -8,8 +8,8 @@ from pyfiglet import figlet_format
 from discord.ext import commands
 from discord.utils import setup_logging
 
-from src.client import MyClient
-from src.data import DatabaseManager, ItemsDatabaseManager
+from custom.client import MyClient
+from custom.data import DatabaseManager, ItemsDatabaseManager
 
 load_dotenv()
 

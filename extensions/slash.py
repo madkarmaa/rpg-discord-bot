@@ -2,7 +2,7 @@ import discord
 from discord.ext import commands
 from discord import Interaction, app_commands
 
-from src.client import MyClient
+from custom.client import MyClient
 
 
 class Slash(commands.Cog):

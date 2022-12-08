@@ -7,7 +7,7 @@ import logging
 import colorama
 from colorama import Fore, Back, Style
 
-from src.data import DatabaseManager, ItemsDatabaseManager
+from .data import DatabaseManager, ItemsDatabaseManager
 
 DSLOGGER = logging.getLogger("discord")
 
