@@ -58,13 +58,34 @@ class DatabaseManager:
 
     async def _create_cursor(self) -> aiosqlite.Cursor:
         """`Async method`\n
-        Internal private method to create a new cursor using the given database connection.
+        Create a new cursor using the given database connection.
 
         Returns:
             `aiosqlite.Cursor`: The new cursor to be used.
         """
         cursor: aiosqlite.Cursor = await self._database_connection.cursor()
         return cursor
+
+
+    async def _validate_table_name(self, table: str) -> None:
+        """`Async method`\n
+        Check if a table exists in the database, else throw an error.
+
+        Args:
+            `table` (`str`): The name of the table.
+
+        Raises:
+            `ValueError`: Raised if the table doesn't exist in the database.
+        """
+        cursor: aiosqlite.Cursor = await self._create_cursor()
+
+        await cursor.execute("SELECT name FROM sqlite_master WHERE type = 'table'")
+        table_names = [table_name[0] for table_name in await cursor.fetchall()]
+
+        await cursor.close()
+
+        if table not in table_names:
+            raise ValueError(f"Invalid table name '{table}'")
 
 
     async def __load_schema(self, schema: str) -> None:
@@ -101,18 +122,13 @@ class ItemsDatabaseManager(DatabaseManager):
 
         cursor: aiosqlite.Cursor = await self._create_cursor()
 
-        # Protection against SQL injections: check if a table exists, else throw an error.
-        await cursor.execute("SELECT name FROM sqlite_master WHERE type = 'table'")
-        table_names = [table_name[0] for table_name in await cursor.fetchall()]
-
-        if table not in table_names:
-            raise ValueError(f"Invalid table name '{table}'")
+        await self._validate_table_name(table)
 
         await cursor.execute(f"""
             SELECT {table}_specials.* FROM {table}
             INNER JOIN {table}_specials
             ON {table}.id = {table}_specials.is_from
-            WHERE melee.name = ?
+            WHERE {table}.name = ?
         """, (base_weapon,))
 
         columns = [column[0] for column in cursor.description]
