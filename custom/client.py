@@ -33,13 +33,13 @@ class MyClient(Bot):
     """
     def __init__(self, *, intents: Intents, _user_database_manager: Type[DatabaseManager], _data_database_manager: ItemsDatabaseManager, _extensions_folders: List[str], _is_testing: bool = False, TEST_GUILD: Type[discord.Object] | None = None, **options: Any) -> None:
         # Constructor-required
-        self._user_database_manager = _user_database_manager
-        self._data_database_manager = _data_database_manager
-        self._extensions_folders = _extensions_folders
+        self._user_database_manager: Type[DatabaseManager] = _user_database_manager
+        self._data_database_manager: ItemsDatabaseManager = _data_database_manager
+        self._extensions_folders: List[str] = _extensions_folders
 
         # Optional
-        self._is_testing = _is_testing
-        self.TEST_GUILD = TEST_GUILD
+        self._is_testing: bool = _is_testing
+        self.TEST_GUILD: Type[discord.Object] | None = TEST_GUILD
 
         super().__init__(intents = intents, **options)
 
