@@ -17,8 +17,8 @@ class Slash(commands.Cog):
     
     @app_commands.command()
     async def test(self, interaction: Interaction):
-        test = await self.bot._data_database_manager.get_weapons_specials("melee", "test1")
-        # test = await self.bot._data_database_manager.get_weapons_specials("invalid", "test1")
+        # test = await self.bot._data_database_manager.get_weapons_specials("melee", "test1")
+        test = await self.bot._data_database_manager.get_weapons_specials("invalid", "test1")
         await interaction.response.send_message(test)
 
 
