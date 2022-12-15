@@ -147,7 +147,7 @@ class ItemsDatabaseManager(DatabaseManager):
         await cursor.execute(f"""
             SELECT {table}_specials.* FROM {table}
             INNER JOIN {table}_specials
-            ON {table}.id = {table}_specials.is_from
+            ON {table}.id = {table}_specials.id_{table}
             WHERE {table}.name = ?
         """, (base_weapon,))
 
