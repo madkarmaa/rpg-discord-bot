@@ -31,7 +31,16 @@ class MyClient(Bot):
 
             `TEST_GUILD` (`Type[discord.Object]`): (Optional) Default is `None`. If `_is_testing` is `True`, then it's required. The guild where the client will copy its commands.
     """
-    def __init__(self, *, intents: Intents, _user_database_manager: Type[DatabaseManager], _data_database_manager: ItemsDatabaseManager, _extensions_folders: List[str], _is_testing: bool = False, TEST_GUILD: Type[discord.Object] | None = None, **options: Any) -> None:
+
+    def __init__(self,
+                 *,
+                 intents: Intents,
+                 _user_database_manager: Type[DatabaseManager],
+                 _data_database_manager: ItemsDatabaseManager,
+                 _extensions_folders: List[str],
+                 _is_testing: bool = False,
+                 TEST_GUILD: Type[discord.Object] | None = None,
+                 **options: Any) -> None:
         # Constructor-required
         self._user_database_manager: Type[DatabaseManager] = _user_database_manager
         self._data_database_manager: ItemsDatabaseManager = _data_database_manager
@@ -41,16 +50,13 @@ class MyClient(Bot):
         self._is_testing: bool = _is_testing
         self.TEST_GUILD: Type[discord.Object] | None = TEST_GUILD
 
-        super().__init__(intents = intents, **options)
-
+        super().__init__(intents=intents, **options)
 
     async def setup_hook(self) -> None:
 
         for folder in self._extensions_folders:
             for extension in [
-                file.replace('.py', '')
-                for file in os.listdir(folder)
-                if os.path.isfile(os.path.join(folder, file))
+                    file.replace('.py', '') for file in os.listdir(folder) if os.path.isfile(os.path.join(folder, file))
             ]:
                 await self.load_extension(f"{folder}.{extension}")
                 DSLOGGER.log(logging.INFO, f"Loaded {folder}.{extension}")
@@ -61,15 +67,16 @@ class MyClient(Bot):
             self.tree.copy_global_to(guild=self.TEST_GUILD)
 
         elif self._is_testing and self.TEST_GUILD is None:
-            raise TypeError("Missing 'TEST_GUILD' parameter. Please make '_is_testing' False or provide a 'TEST_GUILD' parameter.")
+            raise TypeError(
+                "Missing 'TEST_GUILD' parameter. Please make '_is_testing' False or provide a 'TEST_GUILD' parameter.")
 
         elif not self._is_testing and self.TEST_GUILD is not None:
-            raise TypeError("Unnecessary 'TEST_GUILD' parameter. Please make '_is_testing' True or make 'TEST_GUILD' None.")
+            raise TypeError(
+                "Unnecessary 'TEST_GUILD' parameter. Please make '_is_testing' True or make 'TEST_GUILD' None.")
 
         await self.tree.sync(guild=self.TEST_GUILD)
         DSLOGGER.log(logging.INFO, "Synced commands.")
         print(f"{Fore.GREEN}Synced commands{Style.RESET_ALL}")
-
 
     async def close(self) -> None:
         DSLOGGER.log(logging.WARN, "The bot has been turned off.")

@@ -13,6 +13,7 @@ DSLOGGER = logging.getLogger("discord")
 
 
 class Errors(commands.Cog):
+
     def __init__(self, bot: MyClient):
         self.bot = bot
         self.hidden = True
@@ -24,7 +25,8 @@ class Errors(commands.Cog):
         else:
             return interaction.response.send_message
 
-    async def app_command_error(self, interaction: Interaction, error: AppCommandError): # TODO Do more tests for discord.py exceptions.
+    async def app_command_error(self, interaction: Interaction,
+                                error: AppCommandError):  # TODO Do more tests for discord.py exceptions.
         embed: Embed | None = None
         rightNow = datetime.datetime.now()
         rightNow = rightNow.strftime('Date: **%d/%m/%Y**\nTime: **%H:%M:%S**')
@@ -43,30 +45,23 @@ class Errors(commands.Cog):
             embed = Embed(
                 title="Unhandled exception",
                 color=0xff0000,
-                description=f"Command: **/{interaction.command.name}**\nUsed by: **[{interaction.user}](https://discord.com/users/{interaction.user.id})**\n{rightNow}"
+                description=
+                f"Command: **/{interaction.command.name}**\nUsed by: **[{interaction.user}](https://discord.com/users/{interaction.user.id})**\n{rightNow}"
             )
 
-            traceback.print_exception(
-                type(error), error, error.__traceback__, file=buffer
-            )
+            traceback.print_exception(type(error), error, error.__traceback__, file=buffer)
 
             buffer.seek(0)
             buffer = BytesIO(buffer.getvalue().encode("utf-8"))
 
             owner_appdetails = await interaction.client.application_info()
-            await owner_appdetails.owner.send(
-                embed=embed,
-                file=File(buffer, "traceback.txt")
-            )
+            await owner_appdetails.owner.send(embed=embed, file=File(buffer, "traceback.txt"))
 
             embed = Embed(
                 title="It seems like I've ran into a problem. I've already reported the issue to the developer.",
-                color=0xff0000
-            )
+                color=0xff0000)
 
-            await self.send(interaction)(
-                embed=embed
-            )
+            await self.send(interaction)(embed=embed)
 
             DSLOGGER.error('Unhandled exception:', exc_info=(type(error), error, error.__traceback__))
 
