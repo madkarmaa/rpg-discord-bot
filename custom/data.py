@@ -119,7 +119,7 @@ class ItemsDatabaseManager(DatabaseManager):
 
         cursor: aiosqlite.Cursor = await self._create_cursor()
 
-        await self._validate_table_name(table)
+        await self._validate_table_name(table)  # Don't handle ValueError
 
         await cursor.execute(
             f"""
