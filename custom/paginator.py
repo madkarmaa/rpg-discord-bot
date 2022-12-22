@@ -7,8 +7,6 @@ from discord import ButtonStyle, Emoji, PartialEmoji, Interaction
 import logging
 from typing import Optional, Union, Any, List
 
-DSLOGGER = logging.getLogger("discord")
-
 
 class EmbedPaginator(View):
 
@@ -32,7 +30,7 @@ class EmbedPaginator(View):
 
         super().__init__(timeout=timeout)
 
-        self.add_item(self.page_counter)
+        self.add_item(self.page_counter)  # TODO maybe move the button to the middle of the navigation buttons
 
     async def _update_buttons(self) -> None:
         """`Async method`\n
