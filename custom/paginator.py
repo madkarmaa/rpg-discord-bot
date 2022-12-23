@@ -31,9 +31,10 @@ class EmbedPaginator(View):
         super().__init__(timeout=timeout)
 
         self.add_item(self.page_counter)  # TODO maybe move the button to the middle of the navigation buttons
+        self._update_buttons()
 
-    async def _update_buttons(self) -> None:
-        """`Async method`\n
+    def _update_buttons(self) -> None:
+        """`Method`\n
         Method to apply edits to buttons when other buttons are pressed.
         """
         self.first_button.disabled = (self.current_page == 0)
@@ -45,7 +46,7 @@ class EmbedPaginator(View):
     @button(label="<<", style=ButtonStyle.success)
     async def first_button(self, interaction: Interaction, button: Button):
         self.current_page = 0
-        await self._update_buttons()
+        self._update_buttons()
 
         await interaction.response.defer()
         await self.interaction.edit_original_response(embed=self.pages[self.current_page], view=self)
@@ -54,7 +55,7 @@ class EmbedPaginator(View):
     async def previous_button(self, interaction: Interaction, button: Button):
         if self.current_page > 0:
             self.current_page -= 1
-        await self._update_buttons()
+        self._update_buttons()
 
         await interaction.response.defer()
         await self.interaction.edit_original_response(embed=self.pages[self.current_page], view=self)
@@ -63,7 +64,7 @@ class EmbedPaginator(View):
     async def next_button(self, interaction: Interaction, button: Button):
         if self.current_page < self.total_page_count - 1:
             self.current_page += 1
-        await self._update_buttons()
+        self._update_buttons()
 
         await interaction.response.defer()
         await self.interaction.edit_original_response(embed=self.pages[self.current_page], view=self)
@@ -71,7 +72,7 @@ class EmbedPaginator(View):
     @button(label=">>", style=ButtonStyle.success)
     async def last_button(self, interaction: Interaction, button: Button):
         self.current_page = self.total_page_count - 1
-        await self._update_buttons()
+        self._update_buttons()
 
         await interaction.response.defer()
         await self.interaction.edit_original_response(embed=self.pages[self.current_page], view=self)

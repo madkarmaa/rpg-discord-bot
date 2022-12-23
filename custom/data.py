@@ -9,6 +9,20 @@ DSLOGGER = logging.getLogger("discord")
 # See https://stackoverflow.com/questions/12179271/meaning-of-classmethod-and-staticmethod-for-beginner
 
 
+def fix_urls(string: str) -> str:
+    """`Method`\n
+
+    Args:
+        `string` (`str`): The incomplete/invalid url string.
+
+    Returns:
+        `str`: The valid url string.
+    """
+    no_spaces: str = string.replace(" ", "%20")
+    slashes: str = no_spaces.replace("\\", "/")
+    return slashes
+
+
 class DatabaseManager:
 
     def __init__(self, *, database_file_path: str, database_schema_path: str | None = None):
@@ -118,6 +132,7 @@ class ItemsDatabaseManager(DatabaseManager):
         """
 
         cursor: aiosqlite.Cursor = await self._create_cursor()
+        weapon = base_weapon.capitalize()
 
         await self._validate_table_name(table)  # Don't handle ValueError
 
@@ -127,7 +142,7 @@ class ItemsDatabaseManager(DatabaseManager):
             INNER JOIN {table}_specials
             ON {table}.id = {table}_specials.id_{table}
             WHERE {table}.name = ?
-        """, (base_weapon, ))
+        """, (weapon, ))
 
         columns = [column[0] for column in cursor.description]
         rows = [dict(zip(columns, row)) for row in await cursor.fetchall()]

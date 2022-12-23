@@ -4,6 +4,7 @@ from discord import Interaction, app_commands
 
 from custom.client import MyClient
 from custom.paginator import EmbedPaginator
+from custom.data import fix_urls
 
 
 class Slash(commands.Cog):
@@ -27,13 +28,17 @@ class Slash(commands.Cog):
     async def test2(self, interaction: Interaction):
         """Test command 2."""
         starting_page: int = 0
-        embeds = [
-            discord.Embed(description="test 1"),
-            discord.Embed(description="test 2"),
-            discord.Embed(description="test 3"),
-            discord.Embed(description="test 4"),
-            discord.Embed(description="test 5")
-        ]
+        embeds: list[discord.Embed] = []
+        for weapon in await self.bot._data_database_manager.get_weapons_specials("melee", "axe"):
+
+            embed: discord.Embed = discord.Embed(title=weapon.get("name"), description=weapon.get("description"))
+
+            image_path: str = weapon.get("image_path")
+            url: str = fix_urls(f"https://raw.githubusercontent.com/madkarmaa/rpg-discord-bot/dev/{image_path}")
+
+            embed.set_image(url=url)  # TODO When on 'master' change the branch in the url
+
+            embeds.append(embed)
 
         await interaction.response.send_message(embed=embeds[starting_page],
                                                 view=EmbedPaginator(interaction=interaction,
