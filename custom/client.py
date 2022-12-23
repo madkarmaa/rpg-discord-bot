@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import discord
 from discord import Intents
 from discord.ext.commands import Bot

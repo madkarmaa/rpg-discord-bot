@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import re
 import aiosqlite
 import discord
@@ -118,7 +120,7 @@ class ItemsDatabaseManager(DatabaseManager):
     def __init__(self, *, database_file_path: str, database_schema_path: str | None = None):
         super().__init__(database_file_path=database_file_path, database_schema_path=database_schema_path)
 
-    async def get_weapons_specials(self, table: str, base_weapon: str) -> List[Dict[str, Any]]:
+    async def get_weapons_specials(self, table_name: str, base_weapon_name: str) -> List[Dict[str, Any]]:
         """`Async method`\n
         Function to get all the special variants of a given base weapon.
 
@@ -132,7 +134,8 @@ class ItemsDatabaseManager(DatabaseManager):
         """
 
         cursor: aiosqlite.Cursor = await self._create_cursor()
-        weapon = base_weapon.capitalize()
+        table: str = table_name.lower()
+        base_weapon: str = base_weapon_name.capitalize()
 
         await self._validate_table_name(table)  # Don't handle ValueError
 
@@ -142,7 +145,7 @@ class ItemsDatabaseManager(DatabaseManager):
             INNER JOIN {table}_specials
             ON {table}.id = {table}_specials.id_{table}
             WHERE {table}.name = ?
-        """, (weapon, ))
+        """, (base_weapon, ))
 
         columns = [column[0] for column in cursor.description]
         rows = [dict(zip(columns, row)) for row in await cursor.fetchall()]
