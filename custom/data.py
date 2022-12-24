@@ -173,7 +173,21 @@ class DatabaseManager:
         await self._database_connection.commit()
 
     async def get_column_from_table(self, table_name: str, column_name: str) -> List[Dict[str, Any]]:
+        """`Async method`\n
+        Method to get all the values in a given column from a given table in the database.
 
+        Args:
+            `table_name` (`str`): The name of the table.
+            `column_name` (`str`): The name of the column.
+
+        Returns:
+            `List[Dict[str, Any]]`: A list of data.
+
+        Example:
+        ```
+        await get_column_from_table("melee", "name")
+        ```
+        """
         cursor: aiosqlite.Cursor = await self._create_cursor()
         table: str = table_name.lower()
         column_n: str = column_name.lower()
