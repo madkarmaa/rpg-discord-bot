@@ -1,3 +1,10 @@
+"""
+Custom package
+--------------
+
+Custom package for this Discord bot, containing all its dependencies.
+"""
+
 import os
 
 __all__ = []

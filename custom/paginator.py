@@ -1,3 +1,9 @@
+"""
+Custom module for `discord.Embed` message pagination.
+
+`discord.py >= 2.0.0` or a fork with `discord.ui.View`, `discord.ui.Button` and `discord.Embed` is required.
+"""
+
 from __future__ import annotations
 
 import discord
@@ -36,6 +42,11 @@ class EmbedPaginator(View):
     def _update_buttons(self) -> None:
         """`Method`\n
         Method to apply edits to buttons when other buttons are pressed.
+
+        Example:
+        ```
+        _update_buttons()
+        ```
         """
         self.first_button.disabled = (self.current_page == 0)
         self.previous_button.disabled = (self.current_page == 0)

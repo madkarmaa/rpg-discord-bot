@@ -1,8 +1,12 @@
+"""
+Custom module for database management.
+
+`aiosqlite >= 0.18.0` is required.
+"""
+
 from __future__ import annotations
 
-import re
 import aiosqlite
-import discord
 from os.path import abspath, isfile
 from typing import Type, Any, Optional, List, Dict
 import logging
@@ -13,12 +17,18 @@ DSLOGGER = logging.getLogger("discord")
 
 def fix_urls(string: str) -> str:
     """`Method`\n
+    Function to remove spaces and fix backslashes from an url string.
 
     Args:
         `string` (`str`): The incomplete/invalid url string.
 
     Returns:
         `str`: The valid url string.
+
+    Example:
+    ```
+    fix_urls('https://example.com\wrong slash and spaces')
+    ```
     """
     no_spaces: str = string.replace(" ", "%20")
     slashes: str = no_spaces.replace("\\", "/")
@@ -77,6 +87,11 @@ class DatabaseManager:
 
         Returns:
             `aiosqlite.Cursor`: The new cursor to be used.
+
+        Example:
+        ```
+        await _create_cursor()
+        ```
         """
         cursor: aiosqlite.Cursor = await self._database_connection.cursor()
         return cursor
@@ -90,6 +105,11 @@ class DatabaseManager:
 
         Raises:
             `ValueError`: Raised if the table doesn't exist in the database.
+
+        Example:
+        ```
+        await _validate_table_name('melee')
+        ```
         """
         cursor: aiosqlite.Cursor = await self._create_cursor()
 
@@ -107,6 +127,11 @@ class DatabaseManager:
 
         Args:
             schema (str): The path to the schema file.
+
+        Example:
+        ```
+        await __load_schema('path\\to\\file\\schema.sql')
+        ```
         """
         with open(schema) as s:
             _schema = s.read()
@@ -122,7 +147,7 @@ class ItemsDatabaseManager(DatabaseManager):
 
     async def get_weapons_specials(self, table_name: str, base_weapon_name: str) -> List[Dict[str, Any]]:
         """`Async method`\n
-        Function to get all the special variants of a given base weapon.
+        Method to get all the special variants of a given base weapon.
 
         Args:
             `table` (`str`): The table to get the data from (melee, ranged, ...).
@@ -131,13 +156,18 @@ class ItemsDatabaseManager(DatabaseManager):
 
         Returns:
             `List[Dict[str, Any]]`: A list of data.
+
+        Example:
+        ```
+        await get_weapon_specials('melee', 'axe')
+        ```
         """
 
         cursor: aiosqlite.Cursor = await self._create_cursor()
         table: str = table_name.lower()
         base_weapon: str = base_weapon_name.capitalize()
 
-        await self._validate_table_name(table)  # Don't handle ValueError
+        await self._validate_table_name(table)
 
         await cursor.execute(
             f"""
