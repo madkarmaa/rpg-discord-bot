@@ -48,7 +48,7 @@ class Slash(commands.Cog):
 
             embed.set_image(url=url)  # TODO When on 'master' change the branch in the url
 
-            embeds.append(embed)  # FIXME Handle invalid column names
+            embeds.append(embed)  # FIXME Handle invalid column names!!!
 
         await interaction.response.send_message(embed=embeds[starting_page],
                                                 view=EmbedPaginator(interaction=interaction,
