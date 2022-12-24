@@ -35,6 +35,39 @@ def fix_urls(string: str) -> str:
     return slashes
 
 
+def rgb_to_hex(color: tuple) -> int:
+    """`Method`\n
+    Function to convert a RGB color (tuple of 3 items) into an hexadecimal color.
+
+    Args:
+        `color` (`tuple`): The tuple containing the 3 RGB values.
+
+    Raises:
+        `ValueError`: Raised if the RGB values are invalid (less than 0 or greater than 255).
+
+    Returns:
+        `int`: The hexadecimal color.
+
+    Example:
+    ```
+    rgb_to_hex((12, 25, 38)) # Returns 0x0c1926
+    ```
+    """
+    invalid_values = [val for val in color if val < 0 or val > 255]
+    if invalid_values:
+        raise ValueError(f'RGB values must be between 0 and 255 (invalid values: {invalid_values})')
+
+    r, g, b = color
+
+    hex_r = hex(r)[2:].zfill(2)
+    hex_g = hex(g)[2:].zfill(2)
+    hex_b = hex(b)[2:].zfill(2)
+
+    hex_color = '0x' + hex_r + hex_g + hex_b
+
+    return int(hex_color, 16)
+
+
 class DatabaseManager:
 
     def __init__(self, *, database_file_path: str, database_schema_path: str | None = None):
@@ -139,6 +172,23 @@ class DatabaseManager:
         await self._database_connection.executescript(_schema)
         await self._database_connection.commit()
 
+    async def get_column_from_table(self, table_name: str, column_name: str) -> List[Dict[str, Any]]:
+
+        cursor: aiosqlite.Cursor = await self._create_cursor()
+        table: str = table_name.lower()
+        column_n: str = column_name.lower()
+
+        await self._validate_table_name(table)
+
+        await cursor.execute(f"SELECT {column_n} FROM {table}")
+
+        columns = [column[0] for column in cursor.description]
+        rows = [dict(zip(columns, row)) for row in await cursor.fetchall()]
+
+        await cursor.close()
+
+        return rows
+
 
 class ItemsDatabaseManager(DatabaseManager):
 
@@ -165,7 +215,7 @@ class ItemsDatabaseManager(DatabaseManager):
 
         cursor: aiosqlite.Cursor = await self._create_cursor()
         table: str = table_name.lower()
-        base_weapon: str = base_weapon_name.capitalize()
+        base_weapon: str = base_weapon_name.title()
 
         await self._validate_table_name(table)
 

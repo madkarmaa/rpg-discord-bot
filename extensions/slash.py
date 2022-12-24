@@ -3,10 +3,12 @@ from __future__ import annotations
 import discord
 from discord.ext import commands
 from discord import Interaction, app_commands
+from discord.app_commands import Choice
+from colorthief import ColorThief
 
 from custom.client import MyClient
 from custom.paginator import EmbedPaginator
-from custom.data import fix_urls
+from custom.data import fix_urls, rgb_to_hex
 
 
 class Slash(commands.Cog):
@@ -33,11 +35,15 @@ class Slash(commands.Cog):
         """Test command 2."""
         starting_page: int = 0
         embeds: list[discord.Embed] = []
+
         for weapon in await self.bot._data_database_manager.get_weapons_specials("melee", weapon_name):
-
-            embed: discord.Embed = discord.Embed(title=weapon.get("name"), description=weapon.get("description"))
-
             image_path: str = weapon.get("image_path")
+            main_image_color: tuple = ColorThief(f".\\{image_path}").get_color(1)
+
+            embed: discord.Embed = discord.Embed(title=weapon.get("name"),
+                                                 description=weapon.get("description"),
+                                                 color=rgb_to_hex(main_image_color))
+
             url: str = fix_urls(f"https://raw.githubusercontent.com/madkarmaa/rpg-discord-bot/dev/{image_path}")
 
             embed.set_image(url=url)  # TODO When on 'master' change the branch in the url
@@ -48,6 +54,17 @@ class Slash(commands.Cog):
                                                 view=EmbedPaginator(interaction=interaction,
                                                                     pages=embeds,
                                                                     current_page=starting_page))
+
+    @test2.autocomplete("weapon_name")
+    async def test2_autocomplete(self, interaction: Interaction, current: str) -> list:
+        client: MyClient = interaction.client
+        weapons: dict = await client._data_database_manager.get_column_from_table("melee", "name")
+        names_list: list[str] = [name.get("name") for name in weapons]
+
+        all_choices: list[Choice] = [Choice(name=weapon_name, value=weapon_name) for weapon_name in names_list]
+        startswith: list = [c for c in all_choices if current.startswith(c.name.lower())]
+
+        return (startswith or all_choices)[:25]
 
 
 async def setup(bot: MyClient):
