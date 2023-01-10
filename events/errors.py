@@ -10,6 +10,7 @@ from discord.app_commands.errors import AppCommandError, CommandNotFound
 from discord.ext import commands
 
 from custom.client import MyClient
+from custom.exceptions import InvalidItem
 
 DSLOGGER = logging.getLogger("discord")
 
@@ -27,17 +28,13 @@ class Errors(commands.Cog):
         else:
             return interaction.response.send_message
 
-    async def app_command_error(self, interaction: Interaction,
-                                error: AppCommandError):  # TODO Do more tests for discord.py exceptions.
+    async def app_command_error(self, interaction: Interaction, error: AppCommandError):  # TODO Do more tests for discord.py exceptions.
         embed: Embed | None = None
         rightNow = datetime.datetime.now()
         rightNow = rightNow.strftime('Date: **%d/%m/%Y**\nTime: **%H:%M:%S**')
 
-        # exception_list = traceback.format_exception(type(error), error, error.__traceback__)
-        # exception_string = "".join(exception_list).encode("utf-8")
-
-        # if isinstance(error, ):
-        #     embed = Embed(description=str(error))
+        if isinstance(error, InvalidItem):
+            embed = Embed(title=str(error), color=0xff0000)
 
         if embed is not None:
             return await self.send(interaction)(embed=embed)

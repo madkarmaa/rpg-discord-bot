@@ -10,6 +10,9 @@ import aiosqlite
 from os.path import abspath, isfile
 from typing import Type, Any, Optional, List, Dict
 import logging
+import re
+
+from .exceptions import InvalidItem
 
 DSLOGGER = logging.getLogger("discord")
 # See https://stackoverflow.com/questions/12179271/meaning-of-classmethod-and-staticmethod-for-beginner
@@ -30,9 +33,9 @@ def fix_urls(string: str) -> str:
     fix_urls('https://example.com\wrong slash and spaces')
     ```
     """
-    no_spaces: str = string.replace(" ", "%20")
-    slashes: str = no_spaces.replace("\\", "/")
-    return slashes
+    string: str = string.replace(" ", "%20")
+    string: str = string.replace("\\", "/")
+    return string
 
 
 def rgb_to_hex(color: tuple) -> int:
@@ -129,30 +132,64 @@ class DatabaseManager:
         cursor: aiosqlite.Cursor = await self._database_connection.cursor()
         return cursor
 
-    async def _validate_table_name(self, table: str) -> None:
+    async def validate_table_name(self, table_name: str):
         """`Async method`\n
-        Check if a table exists in the database, else throw an error.
-
+        Method to validate if a table exists in the database.
+    
         Args:
-            `table` (`str`): The name of the table.
-
+            `table_name` (`str`): The name of the table.
+    
         Raises:
-            `ValueError`: Raised if the table doesn't exist in the database.
+            `TableNotFoundError`: If the table does not exist in the database.
 
         Example:
         ```
-        await _validate_table_name('melee')
+        await validate_table_name('invalid') # TableNotFoundError: Table 'invalid' does not exist in the database.
         ```
         """
         cursor: aiosqlite.Cursor = await self._create_cursor()
+        table: str = table_name.lower()
 
-        await cursor.execute("SELECT name FROM sqlite_master WHERE type = 'table'")
-        table_names = [table_name[0] for table_name in await cursor.fetchall()]
+        await cursor.execute(f"SELECT name FROM sqlite_master WHERE type='table' AND name='{table}'")
+        if not await cursor.fetchone():
+            raise TableNotFoundError(f"Table '{table}' does not exist in the database.")
 
         await cursor.close()
 
-        if table not in table_names:
-            raise ValueError(f"Invalid table name '{table}'")
+
+    @staticmethod
+    async def sanitize_input(*strings: str) -> list[str]:
+        """`Async method`\n
+        Method to clean a string for SQL queries (protection against SQL injections)
+
+        Args:
+            `*strings` (`str`): The strings to sanitize.
+
+        Returns:
+            `list[str]`: The sanitized strings.
+
+        Example:
+        ```
+        a_table, a_column, a_value = await sanitize_input('a_table', 'a_column', 'a_value')
+        ```
+        """
+        sanitized_inputs: list[str] = []
+
+        for string in strings:
+            string = string.strip()
+
+            string = string.replace("'", "''")
+            string = string.replace('"', '\"')
+            string = string.replace("\\", "\\\\")
+            string = string.replace("%", "\\%")
+            string = string.replace("_", "\\_")
+            string = string.replace(";", "")
+
+            string = re.sub(r'[^\w\s]', '', string)
+
+            sanitized_inputs.append(string)
+
+        return sanitized_inputs
 
     async def __load_schema(self, schema: str) -> None:
         """`Async method`\n
@@ -192,7 +229,9 @@ class DatabaseManager:
         table: str = table_name.lower()
         column_n: str = column_name.lower()
 
-        await self._validate_table_name(table)
+        table, column_n = await self.sanitize_input(table, column_n)
+
+        await self.validate_table_name(table)
 
         await cursor.execute(f"SELECT {column_n} FROM {table}")
 
@@ -231,7 +270,7 @@ class ItemsDatabaseManager(DatabaseManager):
         table: str = table_name.lower()
         base_weapon: str = base_weapon_name.title()
 
-        await self._validate_table_name(table)
+        await self.validate_table_name(table)
 
         await cursor.execute(
             f"""
@@ -247,3 +286,8 @@ class ItemsDatabaseManager(DatabaseManager):
         await cursor.close()
 
         return rows
+
+
+class TableNotFoundError(Exception):
+    def __init__(self, message: str):
+        self.message = message

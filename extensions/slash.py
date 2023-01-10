@@ -1,4 +1,5 @@
 from __future__ import annotations
+from typing import Any
 
 import discord
 from discord.ext import commands
@@ -9,6 +10,7 @@ from colorthief import ColorThief
 from custom.client import MyClient
 from custom.paginator import EmbedPaginator
 from custom.data import fix_urls, rgb_to_hex
+from custom.exceptions import InvalidItem
 
 
 class Slash(commands.Cog):
@@ -34,9 +36,13 @@ class Slash(commands.Cog):
     async def test2(self, interaction: Interaction, weapon_name: str):
         """Test command 2."""
         starting_page: int = 0
+        rows: list[dict[str, Any]] = await self.bot._data_database_manager.get_weapons_specials("melee", weapon_name)
         embeds: list[discord.Embed] = []
 
-        for weapon in await self.bot._data_database_manager.get_weapons_specials("melee", weapon_name):
+        if not rows:
+            raise InvalidItem(weapon_name)
+
+        for weapon in rows:
             image_path: str = weapon.get("image_path")
             main_image_color: tuple = ColorThief(f".\\{image_path}").get_color(1)
 
