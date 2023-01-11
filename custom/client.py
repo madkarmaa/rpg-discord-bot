@@ -35,15 +35,18 @@ class MyClient(Bot):
     """
 
     def __init__(
-            self,
-            *,
-            intents: Intents,
-            _user_database_manager: Type[DatabaseManager],  # TODO Change to specific database manager
-            _data_database_manager: ItemsDatabaseManager,
-            _extensions_folders: List[str],
-            _is_testing: bool = False,
-            TEST_GUILD: Type[discord.Object] | None = None,
-            **options: Any) -> None:
+        self,
+        *,
+        intents: Intents,
+        _user_database_manager: Type[
+            DatabaseManager
+        ],  # TODO Change to specific database manager
+        _data_database_manager: ItemsDatabaseManager,
+        _extensions_folders: List[str],
+        _is_testing: bool = False,
+        TEST_GUILD: Type[discord.Object] | None = None,
+        **options: Any,
+    ) -> None:
         # Constructor-required
         self._user_database_manager: Type[DatabaseManager] = _user_database_manager
         self._data_database_manager: ItemsDatabaseManager = _data_database_manager
@@ -59,7 +62,9 @@ class MyClient(Bot):
 
         for folder in self._extensions_folders:
             for extension in [
-                    file.replace('.py', '') for file in os.listdir(folder) if os.path.isfile(os.path.join(folder, file))
+                file.replace(".py", "")
+                for file in os.listdir(folder)
+                if os.path.isfile(os.path.join(folder, file))
             ]:
                 await self.load_extension(f"{folder}.{extension}")
                 DSLOGGER.log(logging.INFO, f"Loaded {folder}.{extension}")
@@ -71,11 +76,13 @@ class MyClient(Bot):
 
         elif self._is_testing and self.TEST_GUILD is None:
             raise TypeError(
-                "Missing 'TEST_GUILD' parameter. Please make '_is_testing' False or provide a 'TEST_GUILD' parameter.")
+                "Missing 'TEST_GUILD' parameter. Please make '_is_testing' False or provide a 'TEST_GUILD' parameter."
+            )
 
         elif not self._is_testing and self.TEST_GUILD is not None:
             raise TypeError(
-                "Unnecessary 'TEST_GUILD' parameter. Please make '_is_testing' True or make 'TEST_GUILD' None.")
+                "Unnecessary 'TEST_GUILD' parameter. Please make '_is_testing' True or make 'TEST_GUILD' None."
+            )
 
         await self.tree.sync(guild=self.TEST_GUILD)
         DSLOGGER.log(logging.INFO, "Synced commands.")

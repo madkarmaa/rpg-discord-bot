@@ -16,7 +16,6 @@ DSLOGGER = logging.getLogger("discord")
 
 
 class Events(commands.Cog):
-
     def __init__(self, bot: MyClient):
         self.bot = bot
 
@@ -24,7 +23,9 @@ class Events(commands.Cog):
     async def on_ready(self):
 
         DSLOGGER.log(logging.INFO, f"Logged in as {self.bot.user}")
-        print(f"{Fore.CYAN}Logged in as {Fore.BLACK}{Back.CYAN}{self.bot.user}{Style.RESET_ALL}")
+        print(
+            f"{Fore.CYAN}Logged in as {Fore.BLACK}{Back.CYAN}{self.bot.user}{Style.RESET_ALL}"
+        )
 
     async def cog_load(self):
         self.task_change_status = self.bot.loop.create_task(self.loop_change_status())
@@ -39,9 +40,12 @@ class Events(commands.Cog):
 
         while not self.bot.is_closed():
             for status in statuses:
-                await self.bot.change_presence(activity=discord.Activity(type=discord.ActivityType.watching,
-                                                                         name=status),
-                                               status=discord.Status.idle)
+                await self.bot.change_presence(
+                    activity=discord.Activity(
+                        type=discord.ActivityType.watching, name=status
+                    ),
+                    status=discord.Status.idle,
+                )
                 await asyncio.sleep(10)
 
 
