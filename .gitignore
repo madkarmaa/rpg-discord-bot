@@ -5,3 +5,4 @@ databases/*.db
 logs/*.log
 .vscode/
 items.session.sql
+**/TODO.todo

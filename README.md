@@ -8,6 +8,7 @@ All the assets used for this bot ([here][assets]) are made using Artificial Inte
 
 **Tools used**:
 
+- [Chat GPT][chat-gpt]
 - [Stable Diffusion 1.5][stable-diffusion]
 - [DALL-E 2][dall-e]
 - [Pixel It][pixelit]
@@ -48,3 +49,4 @@ pip install -r requirements.txt
 [stable-diffusion]: https://playgroundai.com/
 [dall-e]: https://labs.openai.com/
 [pixelit]: https://giventofly.github.io/pixelit/
+[chat-gpt]: https://chat.openai.com/chat/
