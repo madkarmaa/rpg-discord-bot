@@ -13,6 +13,8 @@ import logging
 import re
 from urllib.parse import quote
 
+from .exceptions import InvalidRGBColor
+
 
 DSLOGGER = logging.getLogger("discord")
 # See https://stackoverflow.com/questions/12179271/meaning-of-classmethod-and-staticmethod-for-beginner
@@ -228,20 +230,18 @@ class ItemsDatabaseManager(DatabaseManager):
         ```
         """
         # Remove any whitespace characters from the start and end of the string
-        _string = url_string.strip()
+        _string: str = url_string.strip()
 
         # Replace backslashes with forward slashes
         _string = _string.replace("\\", "/")
 
-        # Replace spaces with %20
-        _string = _string.replace(" ", "%20")
-
         # Split the URL string into parts
         url_parts = _string.split(":", 1)
 
-        # if there is only one element in url_parts it's not valid url
+        # if there is only one element in url_parts it's not a valid url
         if len(url_parts) < 2:
             return ""
+
         # Extract the scheme and the rest of the URL
         scheme, rest_of_url = url_parts
 
@@ -257,9 +257,6 @@ class ItemsDatabaseManager(DatabaseManager):
 
         # Rebuild the URL
         _string = scheme + ":" + rest_of_url + fragment_identifier
-
-        # Remove any extra characters present in the url
-        _string = re.sub(r"[^a-zA-Z0-9:/.#-]+", "", _string)
 
         return _string
 
@@ -284,9 +281,7 @@ class ItemsDatabaseManager(DatabaseManager):
         """
         invalid_values = [val for val in color if val < 0 or val > 255]
         if invalid_values:
-            raise ValueError(
-                f"RGB values must be between 0 and 255 (invalid values: {invalid_values})"
-            )
+            raise InvalidRGBColor(invalid_values)
 
         r, g, b = color
 

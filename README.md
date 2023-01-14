@@ -2,6 +2,16 @@
 
 This is a RPG Discord bot.
 
+## 📢 Info
+
+All the assets used for this bot ([here][assets]) are made using Artificial Intelligence.
+
+**Tools used**:
+
+- [Stable Diffusion 1.5][stable-diffusion]
+- [DALL-E 2][dall-e]
+- [Pixel It][pixelit]
+
 ## ⚙️ How to install
 
 1. Install the [Microsoft C++ Build Tools][vstools]
@@ -34,3 +44,7 @@ pip install -r requirements.txt
 
 [vstools]: https://visualstudio.microsoft.com/visual-cpp-build-tools/
 [git]: https://git-scm.com/downloads
+[assets]: ./assets/
+[stable-diffusion]: https://playgroundai.com/
+[dall-e]: https://labs.openai.com/
+[pixelit]: https://giventofly.github.io/pixelit/
