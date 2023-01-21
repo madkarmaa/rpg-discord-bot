@@ -10,10 +10,11 @@ from colorama import Fore, Back, Style
 import os
 import shutil
 import glob
-from typing import Type, Any, Optional, List, Dict, Union
+from typing import Type, Any, Optional, List, Dict, Union, Generator
 import logging
 import datetime
 import traceback
+from contextlib import contextmanager
 
 
 colorama.init()
@@ -311,6 +312,26 @@ class DatabaseManager:
         self.log("Database recovery complete.", level=logging.INFO)
 
         self.connection = self.connect()
+
+    @contextmanager
+    def create_cursor(self) -> Generator[sqlite3.Cursor, None, None]:
+        """`Method`\n
+        Create a new cursor that can be used to query the database.
+
+        Yields:
+            `sqlite3.Cursor`: A cursor object.
+
+        Example:
+        ```python
+        with create_cursor() as cursor:
+            # Do something with the cursor
+        ```
+        """
+        cur: sqlite3.Cursor = self.connection.cursor()
+        try:
+            yield cur
+        finally:
+            cur.close()
 
 
 class TableNotFoundError(Exception):
