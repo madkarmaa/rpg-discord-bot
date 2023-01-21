@@ -23,13 +23,13 @@ class MyClient(Bot):
 
             `database_manager` (`DatabaseManager`): (Required) The connection to the users database.
 
-            `_extensions_folders` (`List[str]`): (Required) A list of folders to include in the extensions loading.
+            `extensions_folders` (`List[str]`): (Required) A list of folders to include in the extensions loading.
 
         Not needed to pass in the constructor:
 
-            `_is_testing` (`bool`): (Optional) Default is `False`. Whether the client should copy its commands to a testing guild.
+            `is_testing` (`bool`): (Optional) Default is `False`. Whether the client should copy its commands to a testing guild.
 
-            `TEST_GUILD` (`Type[discord.Object]`): (Optional) Default is `None`. If `_is_testing` is `True`, then it's required. The guild where the client will copy its commands.
+            `TEST_GUILD` (`Type[discord.Object]`): (Optional) Default is `None`. If `is_testing` is `True`, then it's required. The guild where the client will copy its commands.
     """
 
     def __init__(
@@ -37,24 +37,24 @@ class MyClient(Bot):
         *,
         intents: Intents,
         database_manager: DatabaseManager,
-        _extensions_folders: List[str],
-        _is_testing: bool = False,
+        extensions_folders: List[str],
+        is_testing: bool = False,
         TEST_GUILD: Type[discord.Object] | None = None,
         **options: Any,
     ) -> None:
         # Constructor-required
         self.database_manager = database_manager
-        self._extensions_folders: List[str] = _extensions_folders
+        self.extensions_folders: List[str] = extensions_folders
 
         # Optional
-        self._is_testing: bool = _is_testing
+        self.is_testing: bool = is_testing
         self.TEST_GUILD: Type[discord.Object] | None = TEST_GUILD
 
         super().__init__(intents=intents, **options)
 
     async def setup_hook(self) -> None:
 
-        for folder in self._extensions_folders:
+        for folder in self.extensions_folders:
             for extension in [
                 file.replace(".py", "")
                 for file in os.listdir(folder)
@@ -63,19 +63,19 @@ class MyClient(Bot):
                 await self.load_extension(f"{folder}.{extension}")
                 DSLOGGER.log(logging.INFO, f"Loaded {folder}.{extension}")
 
-        if self._is_testing and self.TEST_GUILD is not None:
+        if self.is_testing and self.TEST_GUILD is not None:
             DSLOGGER.log(logging.WARN, "The bot is in testing mode.")
             print(f"{Fore.BLACK}{Back.RED}The bot is in testing mode.{Style.RESET_ALL}")
             self.tree.copy_global_to(guild=self.TEST_GUILD)
 
-        elif self._is_testing and self.TEST_GUILD is None:
+        elif self.is_testing and self.TEST_GUILD is None:
             raise TypeError(
-                "Missing 'TEST_GUILD' parameter. Please make '_is_testing' False or provide a 'TEST_GUILD' parameter."
+                "Missing 'TEST_GUILD' parameter. Please make 'is_testing' False or provide a 'TEST_GUILD' parameter."
             )
 
-        elif not self._is_testing and self.TEST_GUILD is not None:
+        elif not self.is_testing and self.TEST_GUILD is not None:
             raise TypeError(
-                "Unnecessary 'TEST_GUILD' parameter. Please make '_is_testing' True or make 'TEST_GUILD' None."
+                "Unnecessary 'TEST_GUILD' parameter. Please make 'is_testing' True or make 'TEST_GUILD' None."
             )
 
         await self.tree.sync(guild=self.TEST_GUILD)

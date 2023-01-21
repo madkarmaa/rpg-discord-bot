@@ -38,8 +38,8 @@ client = MyClient(
     ),
     intents=discord.Intents.default(),
     database_manager=mg,
-    _extensions_folders=["events", "extensions"],
-    _is_testing=True,
+    extensions_folders=["events", "extensions"],
+    is_testing=True,
     TEST_GUILD=discord.Object(environ["TEST_GUILD"]),
 )
 

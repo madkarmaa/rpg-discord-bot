@@ -1,6 +1,6 @@
 # RPG Discord Bot
 
-This is a RPG Discord bot.
+A simple(?) RPG-game Discord bot written using discord.py library.
 
 ## 📢 Info
 
