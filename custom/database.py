@@ -43,23 +43,13 @@ class DatabaseManager:
         self.connection = None
 
     def __enter__(self):
-        self.log("Attempting connection to the database...", level=logging.INFO)
-
         if not self.is_connected:
             self.connection = self.connect()
             self.load_schema()
 
-        if self.is_connected:
-            self.log(
-                f"Successfully connected to {self.database_file_path}",
-                level=logging.INFO,
-            )
-
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
-        self.log("Attempting to disconnect from the database...", level=logging.INFO)
-
         if self.is_connected:
             self.disconnect()
 
@@ -161,6 +151,8 @@ class DatabaseManager:
         connect()
         ```
         """
+        self.log("Attempting connection to the database...", level=logging.INFO)
+
         try:
             conn: sqlite3.Connection = sqlite3.connect(self.database_file_path)
             self.db_already_exists = self.check_database_exists()
@@ -172,6 +164,13 @@ class DatabaseManager:
             self.is_connected = False
             self.log("Error connecting to the database.", level=logging.ERROR, error=e)
             raise e
+
+        finally:
+            if self.is_connected:
+                self.log(
+                    f"Successfully connected to {self.database_file_path}",
+                    level=logging.INFO,
+                )
 
     def disconnect(self) -> None:
         """`Method`\n
@@ -185,14 +184,18 @@ class DatabaseManager:
         disconnect()
         ```
         """
+        self.log("Attempting to disconnect from the database...", level=logging.INFO)
+
         try:
             self.connection.commit()
             self.connection.close()
+
         except sqlite3.Error as e:
             self.log(
                 "Error disconnecting from the database.", level=logging.ERROR, error=e
             )
             raise e
+
         finally:
             self.is_connected = False
 
@@ -275,8 +278,12 @@ class DatabaseManager:
             os.path.join(self.database_backups_path, f"{right_now}_-_{file_name}.bak")
         )
 
+        self.disconnect()
+
         shutil.copy2(self.database_file_path, backup_path)
         self.log("Database backup complete.", level=logging.INFO)
+
+        self.connection = self.connect()
 
     def recover(self) -> None:
         """`Method`\n
@@ -296,10 +303,14 @@ class DatabaseManager:
             return
 
         backup_file = max(backup_files, key=os.path.getctime)
+
+        self.disconnect()
+
         # DEBUG: self.database_file_path -> "./databases/recovery.db"
         shutil.copy2(backup_file, self.database_file_path)
-
         self.log("Database recovery complete.", level=logging.INFO)
+
+        self.connection = self.connect()
 
 
 class TableNotFoundError(Exception):
