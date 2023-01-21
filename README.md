@@ -2,7 +2,7 @@
 
 ![Lol](https://img.shields.io/badge/Status-In%20development-critical?style=for-the-badge&logo=discord&logoColor=critical)
 
-A simple(?) RPG-game Discord bot written using discord.py library.
+A simple(?) RPG-game Discord bot written using [discord.py][dpy] library.
 
 ## 📢 Info
 
@@ -52,3 +52,4 @@ pip install -r requirements.txt
 [dall-e]: https://labs.openai.com/
 [pixelit]: https://giventofly.github.io/pixelit/
 [chat-gpt]: https://chat.openai.com/chat/
+[dpy]: https://github.com/Rapptz/discord.py
