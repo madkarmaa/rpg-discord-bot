@@ -1,5 +1,7 @@
 # RPG Discord Bot
 
+![Lol](https://img.shields.io/badge/Status-In%20development-critical?style=for-the-badge&logo=discord&logoColor=critical)
+
 A simple(?) RPG-game Discord bot written using discord.py library.
 
 ## 📢 Info
