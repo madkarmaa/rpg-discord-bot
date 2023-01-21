@@ -11,7 +11,7 @@ from discord.ext import commands
 from discord.utils import setup_logging
 
 from custom.client import MyClient
-from custom.database import DatabaseManager, ItemsDatabaseManager
+from custom.database import DatabaseManager
 
 load_dotenv()
 
@@ -25,11 +25,19 @@ setup_logging(
     level=logging.INFO,
 )
 
+mg = DatabaseManager(
+    "./databases/test.db",
+    database_schema_path="./databases/schemas/items_db_schema.sql",
+    database_backups_path="./databases/backups/",
+    logger=logging.getLogger("discord"),
+)
+
 client = MyClient(
     command_prefix=commands.when_mentioned_or(
         "my_message_content_perm_must_be_disabled"
     ),
     intents=discord.Intents.default(),
+    database_manager=mg,
     _extensions_folders=["events", "extensions"],
     _is_testing=True,
     TEST_GUILD=discord.Object(environ["TEST_GUILD"]),
@@ -37,8 +45,9 @@ client = MyClient(
 
 
 async def main() -> None:
-    async with client, client._user_database_manager, client._data_database_manager:
-        await client.start(environ["TOKEN"])
+    async with client:
+        with client.database_manager:
+            await client.start(environ["TOKEN"])
 
 
 if __name__ == "__main__":

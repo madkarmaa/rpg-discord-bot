@@ -28,7 +28,7 @@ class DatabaseManager:
         *,
         database_schema_path: Optional[str] = None,
         database_backups_path: Optional[str] = None,
-        LOGGER: Optional[Union[logging.Logger, str]] = None,
+        logger: Optional[Union[logging.Logger, str]] = None,
     ):
         self.database_file_path = os.path.normpath(database_file_path)
         self.database_schema_path = (
@@ -37,7 +37,7 @@ class DatabaseManager:
         self.database_backups_path = (
             os.path.normpath(database_backups_path) if database_backups_path else None
         )
-        self.LOGGER = self.check_logging(LOGGER)
+        self.LOGGER = self.check_logging(logger)
 
         self.db_already_exists: bool = self.check_database_exists()
         self.is_connected: bool = False
@@ -123,7 +123,7 @@ class DatabaseManager:
                 )
 
             else:
-                self.LOGGER.log(level, message)
+                self.LOGGER.log(level=level, msg=message)
 
         else:
 
@@ -235,7 +235,8 @@ class DatabaseManager:
             not overwrite and self.db_already_exists
         ):
             self.log(
-                "No database schema was provided, or overwrite is disabled. Skipping this step."
+                "No database schema was provided, or overwrite is disabled. Skipping this step.",
+                level=logging.INFO,
             )
             return
 

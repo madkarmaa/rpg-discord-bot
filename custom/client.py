@@ -21,9 +21,7 @@ class MyClient(Bot):
 
         Constructor-required:
 
-            `_user_database_manager` (`Type[DatabaseManager]`): (Required) The connection to the users database.
-
-            `_data_database_manager` (`Type[DatabaseManager]`): (Required) The connection to the data (items, ...) database.
+            `database_manager` (`DatabaseManager`): (Required) The connection to the users database.
 
             `_extensions_folders` (`List[str]`): (Required) A list of folders to include in the extensions loading.
 
@@ -38,12 +36,14 @@ class MyClient(Bot):
         self,
         *,
         intents: Intents,
+        database_manager: DatabaseManager,
         _extensions_folders: List[str],
         _is_testing: bool = False,
         TEST_GUILD: Type[discord.Object] | None = None,
         **options: Any,
     ) -> None:
         # Constructor-required
+        self.database_manager = database_manager
         self._extensions_folders: List[str] = _extensions_folders
 
         # Optional
