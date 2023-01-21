@@ -12,18 +12,28 @@ from typing import Any
 class InvalidItem(AppCommandError):
     """Raised when no item is found in the database."""
 
-    def __init__(self, item: Any):
+    def __init__(self, item: Any) -> None:
         self.item = item
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"Cannot find '{self.item}'."
 
 
 class InvalidRGBColor(AppCommandError):
     """Raised when the given RGB Color is invalid."""
 
-    def __init__(self, color: Any):
+    def __init__(self, color: Any) -> None:
         self.color = color
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"RGB values must be between 0 and 255 (invalid values: {self.color})."
+
+
+class UserNotFoundError(AppCommandError):
+    """Raised when a user is not found in the database."""
+
+    def __init__(self, user_id: int) -> None:
+        self.user_id = user_id
+
+    def __str__(self) -> str:
+        return f"User with ID '{self.user_id}' not found in the database."

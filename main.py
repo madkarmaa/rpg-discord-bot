@@ -11,7 +11,7 @@ from discord.ext import commands
 from discord.utils import setup_logging
 
 from custom.client import MyClient
-from custom.data import DatabaseManager, ItemsDatabaseManager
+from custom.database import DatabaseManager, ItemsDatabaseManager
 
 load_dotenv()
 
@@ -30,14 +30,6 @@ client = MyClient(
         "my_message_content_perm_must_be_disabled"
     ),
     intents=discord.Intents.default(),
-    _user_database_manager=DatabaseManager(  # TODO set real database manager
-        database_file_path="./databases/users.db",
-        database_schema_path="./databases/schemas/users_db_schema.sql",
-    ),
-    _data_database_manager=ItemsDatabaseManager(
-        database_file_path="./databases/items.db",
-        database_schema_path="./databases/schemas/items_db_schema.sql",
-    ),
     _extensions_folders=["events", "extensions"],
     _is_testing=True,
     TEST_GUILD=discord.Object(environ["TEST_GUILD"]),
