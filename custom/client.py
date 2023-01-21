@@ -3,7 +3,7 @@ from __future__ import annotations
 import discord
 from discord import Intents
 from discord.ext.commands import Bot
-from typing import Any, List, Type, Union
+from typing import Any, List, Type, Union, Optional
 import os
 import logging
 import colorama
@@ -39,18 +39,18 @@ class MyClient(Bot):
         database_manager: DatabaseManager,
         extensions_folders: List[str],
         is_testing: bool = False,
-        TEST_GUILD: Type[discord.Object] | None = None,
+        test_guild: Optional[Type[discord.Object]] = None,
         **options: Any,
     ) -> None:
         # Constructor-required
         self.database_manager = database_manager
-        self.extensions_folders: List[str] = extensions_folders
+        self.extensions_folders = extensions_folders
 
         # Optional
-        self.is_testing: bool = is_testing
-        self.TEST_GUILD: Type[discord.Object] | None = TEST_GUILD
+        self.is_testing = is_testing
+        self.TEST_GUILD = test_guild
 
-        super().__init__(intents=intents, **options)
+        return super().__init__(intents=intents, **options)
 
     async def setup_hook(self) -> None:
 

@@ -40,7 +40,7 @@ client = MyClient(
     database_manager=mg,
     extensions_folders=["events", "extensions"],
     is_testing=True,
-    TEST_GUILD=discord.Object(environ["TEST_GUILD"]),
+    test_guild=discord.Object(environ["TEST_GUILD"]),
 )
 
 
