@@ -4,7 +4,7 @@ Custom module for database management.
 
 from __future__ import annotations
 
-import sqlite3
+import aiosqlite
 import colorama
 from colorama import Fore, Back, Style
 import os
@@ -14,7 +14,7 @@ from typing import Type, Any, Optional, List, Dict, Union, Generator
 import logging
 import datetime
 import traceback
-from contextlib import contextmanager
+from contextlib import asynccontextmanager
 
 
 colorama.init()
@@ -37,22 +37,21 @@ class DatabaseManager:
         self.database_backups_path = (
             os.path.normpath(database_backups_path) if database_backups_path else None
         )
+
         self.LOGGER = self.check_logging(logger)
 
-        self.db_already_exists: bool = self.check_database_exists()
         self.is_connected: bool = False
         self.connection = None
 
-    def __enter__(self):
+    async def __aenter__(self):
         if not self.is_connected:
-            self.connection = self.connect()
-            self.load_schema()
+            self.connection = await self.connect()
 
         return self
 
-    def __exit__(self, exc_type, exc_val, exc_tb):
+    async def __aexit__(self, exc_type, exc_val, exc_tb):
         if self.is_connected:
-            self.disconnect()
+            await self.disconnect()
 
     def check_logging(
         self, logger: Optional[Union[logging.Logger, str]] = None
@@ -137,33 +136,39 @@ class DatabaseManager:
             else:
                 print(f"{Fore.GREEN}{right_now}{Style.RESET_ALL}: {message}")
 
-    def connect(self) -> sqlite3.Connection:
-        """`Method`\n
+    async def connect(self) -> aiosqlite.Connection:
+        """`Coro`\n
         Connects to the database.
 
         Raises:
-            `sqlite3.Error`: Raised if the connection fails.
+            `aiosqlite.Error`: Raised if the connection fails.
 
         Returns:
-            `sqlite3.Connection`: The connection to the database.
+            `aiosqlite.Connection`: The connection to the database.
 
         Example:
         ```python
-        connect()
+        await connect()
         ```
         """
         self.log("Attempting connection to the database...", level=logging.INFO)
 
         try:
-            conn: sqlite3.Connection = sqlite3.connect(self.database_file_path)
-            self.db_already_exists = self.check_database_exists()
+            db_already_exists: bool = self.check_database_exists()
+            conn: aiosqlite.Connection = await aiosqlite.connect(
+                self.database_file_path
+            )
+            await self.load_schema(conn, db_already_exists)
+
             self.is_connected = True
             return conn
 
-        except sqlite3.Error as e:
+        except aiosqlite.Error as e:
             print(f"Error connecting to the database: {e}")
             self.is_connected = False
+
             self.log("Error connecting to the database.", level=logging.ERROR, error=e)
+
             raise e
 
         finally:
@@ -173,25 +178,25 @@ class DatabaseManager:
                     level=logging.INFO,
                 )
 
-    def disconnect(self) -> None:
-        """`Method`\n
+    async def disconnect(self) -> None:
+        """`Coro`\n
         Disconnects from the database.
 
         Raises:
-            `sqlite3.Error`: Raised if the disconnection fails.
+            `aiosqlite.Error`: Raised if the disconnection fails.
 
         Example:
         ```python
-        disconnect()
+        await disconnect()
         ```
         """
         self.log("Attempting to disconnect from the database...", level=logging.INFO)
 
         try:
-            self.connection.commit()
-            self.connection.close()
+            await self.connection.commit()
+            await self.connection.close()
 
-        except sqlite3.Error as e:
+        except aiosqlite.Error as e:
             self.log(
                 "Error disconnecting from the database.", level=logging.ERROR, error=e
             )
@@ -219,58 +224,67 @@ class DatabaseManager:
         """
         return os.path.isfile(self.database_file_path)
 
-    def load_schema(self, *, overwrite: bool = False) -> None:
-        """`Method`\n
+    async def load_schema(
+        self,
+        connection: aiosqlite.Connection,
+        database_exists: bool,
+        *,
+        overwrite: bool = False,
+    ) -> None:
+        """`Coro`\n
         Loads the schema given in the constructor.
 
         Args:
+            `connection` (`aiosqlite.Connection`): The connection to the database since it will most likely not be assigned yet.
+
+            `database_exists` (`bool`): Wether the database already exists or not.
+
             `overwrite` (`bool`, optional): Creates a backup file of the database and then overwrites the main database schema. USE WITH CAUTION, it can lead to corruption/data loss. Defaults to `False`.
 
         Example:
         ```python
-        load_schema(overwrite=True)
+        await load_schema(some_connection, True, overwrite=True)
         ```
         """
-        if self.database_schema_path is None or (
-            not overwrite and self.db_already_exists
-        ):
+        if self.database_schema_path is None or (not overwrite and database_exists):
             self.log(
                 "No database schema was provided, or overwrite is disabled. Skipping this step.",
                 level=logging.INFO,
             )
             return
 
-        if overwrite and self.db_already_exists:
+        if overwrite and database_exists:
             self.log(
                 "Database schema overwrite is enabled, PROCEED WITH CAUTION!",
                 level=logging.WARNING,
             )
-            self.backup()
+            await self.backup()
 
-        elif self.db_already_exists:
+        elif database_exists:
             self.log("Loading database schema for the first time.", level=logging.INFO)
 
         with open(self.database_schema_path) as s:
             schema = s.read()
 
-        self.connection.executescript(schema)
-        self.connection.commit()
+        await connection.executescript(schema)
+        await connection.commit()
 
         self.log(
             f"Successfully loaded {self.database_schema_path} schema.",
             level=logging.INFO,
         )
 
-    def backup(self) -> None:
-        """`Method`\n
+    async def backup(self) -> None:
+        """`Coro`\n
         Creates a backup file of the database.
 
         Example:
         ```python
-        backup()
+        await backup()
         ```
         """
         self.log("Creating a database backup...", level=logging.INFO)
+
         right_now = datetime.datetime.now()
         right_now = right_now.strftime(r"[%d-%m-%Y]_-_[%H-%M-%S]")
 
@@ -280,21 +294,21 @@ class DatabaseManager:
             os.path.join(self.database_backups_path, f"{right_now}_-_{file_name}.bak")
         )
 
-        self.disconnect()
+        await self.disconnect()
 
         shutil.copy2(self.database_file_path, backup_path)
         self.log("Database backup complete.", level=logging.INFO)
 
-        self.connection = self.connect()
+        self.connection = await self.connect()
 
-    def recover(self) -> None:
-        """`Method`\n
+    async def recover(self) -> None:
+        """`Coro`\n
         Restores the database using the last backup file.\n
         Note that this method will overwrite the current database file, so use it with caution.
 
         Example:
         ```python
-        recover()
+        await recover()
         ```
         """
         self.log("Recovering the latest database backup...", level=logging.INFO)
@@ -306,29 +320,29 @@ class DatabaseManager:
 
         backup_file = max(backup_files, key=os.path.getctime)
 
-        self.disconnect()
+        await self.disconnect()
 
         # DEBUG: self.database_file_path -> "./databases/recovery.db"
         shutil.copy2(backup_file, self.database_file_path)
         self.log("Database recovery complete.", level=logging.INFO)
 
-        self.connection = self.connect()
+        self.connection = await self.connect()
 
-    @contextmanager
-    def create_cursor(self) -> Generator[sqlite3.Cursor, None, None]:
-        """`Method`\n
+    @asynccontextmanager
+    async def create_cursor(self) -> Generator[aiosqlite.Cursor, None, None]:
+        """`Coro`\n
         Create a new cursor that can be used to query the database.
 
         Yields:
-            `sqlite3.Cursor`: A cursor object.
+            `aiosqlite.Cursor`: A cursor object.
 
         Example:
         ```python
-        with create_cursor() as cursor:
+        async with create_cursor() as cursor:
             # Do something with the cursor
         ```
         """
-        cur: sqlite3.Cursor = self.connection.cursor()
+        cur: aiosqlite.Cursor = await self.connection.cursor()
         try:
             yield cur
         finally:

@@ -14,20 +14,20 @@ BEGIN TRANSACTION;
    CREATE TABLE inventory (
           inventory_id INTEGER,
           /* Items */
-          CONSTRAINT fk_inventory_id FOREIGN KEY (inventory_id) REFERENCES players (user_id) ON DELETE CASCADE NOT NULL
+          CONSTRAINT fk_inventory_id FOREIGN KEY (inventory_id) REFERENCES players (user_id) ON DELETE CASCADE
           );
 
 
-   INSERT INTO players (user_id, name, class)
-   VALUES (1, 'John Doe', 'Warrior');
+   INSERT INTO players (user_id, class)
+   VALUES (1, 'Warrior');
 
 
    INSERT INTO inventory (inventory_id)
    VALUES (1);
 
 
-   INSERT INTO players (user_id, name, class)
-   VALUES (2, 'Test User', 'Elf');
+   INSERT INTO players (user_id, class)
+   VALUES (2, 'Elf');
 
 
    INSERT INTO inventory (inventory_id)

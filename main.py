@@ -45,9 +45,8 @@ client = MyClient(
 
 
 async def main() -> None:
-    async with client:
-        with client.database_manager:
-            await client.start(environ["TOKEN"])
+    async with client, client.database_manager:
+        await client.start(environ["TOKEN"])
 
 
 if __name__ == "__main__":
