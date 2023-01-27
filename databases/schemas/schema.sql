@@ -11,8 +11,8 @@ BEGIN TRANSACTION;
           );
 
 
-   CREATE TABLE inventory (
-          inventory_id INTEGER,
+   CREATE TABLE inventories (
+          inventory_id INTEGER PRIMARY KEY UNIQUE,
           /* Items */
           CONSTRAINT fk_inventory_id FOREIGN KEY (inventory_id) REFERENCES players (user_id) ON DELETE CASCADE
           );
@@ -22,7 +22,7 @@ BEGIN TRANSACTION;
    VALUES (1, 'Warrior');
 
 
-   INSERT INTO inventory (inventory_id)
+   INSERT INTO inventories (inventory_id)
    VALUES (1);
 
 
@@ -30,7 +30,7 @@ BEGIN TRANSACTION;
    VALUES (2, 'Elf');
 
 
-   INSERT INTO inventory (inventory_id)
+   INSERT INTO inventories (inventory_id)
    VALUES (2);
 
 

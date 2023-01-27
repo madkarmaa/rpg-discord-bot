@@ -10,11 +10,11 @@ from colorama import Fore, Back, Style
 import os
 import shutil
 import glob
-from typing import Type, Any, Optional, List, Dict, Union, Generator
+from typing import Type, Any, Optional, List, Dict, Union
 import logging
 import datetime
 import traceback
-from contextlib import asynccontextmanager
+from contextlib import asynccontextmanager, _AsyncGeneratorContextManager
 
 
 colorama.init()
@@ -329,7 +329,7 @@ class DatabaseManager:
         self.connection = await self.connect()
 
     @asynccontextmanager
-    async def create_cursor(self) -> Generator[aiosqlite.Cursor, None, None]:
+    async def create_cursor(self) -> _AsyncGeneratorContextManager[aiosqlite.Cursor]:
         """`Coro`\n
         Create a new cursor that can be used to query the database.
 
@@ -346,7 +346,7 @@ class DatabaseManager:
         try:
             yield cur
         finally:
-            cur.close()
+            await cur.close()
 
 
 class TableNotFoundError(Exception):
