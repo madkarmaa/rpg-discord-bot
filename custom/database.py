@@ -1,5 +1,7 @@
 """
 Custom module for database management.
+
+`aiosqlite >= 0.18.0` is required.
 """
 
 from __future__ import annotations

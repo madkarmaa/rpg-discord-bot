@@ -10,26 +10,27 @@ from pyfiglet import figlet_format
 from discord.ext import commands
 from discord.utils import setup_logging
 
+import custom.database as cd
 from custom.client import MyClient
 from custom.database import DatabaseManager
 
 load_dotenv()
 
 rightNow = datetime.datetime.now()
-rightNow = rightNow.strftime(r"LOG_date_{%d-%m-%Y}_started_at_{%H-%M-%S}")
+rightNow = rightNow.strftime(r"%d-%m-%Y_%H-%M-%S")
 
 setup_logging(
     handler=logging.FileHandler(
-        filename=f"./logs/{rightNow}.log", encoding="utf-8", mode="w"
+        filename=f"./logs/log_{rightNow}.log", encoding="utf-8", mode="w"
     ),
     level=logging.INFO,
 )
 
 mg = DatabaseManager(
     "./databases/test.db",
-    database_schema_path="./databases/schemas/items_db_schema.sql",
+    database_schema_path="./databases/schemas/schema.sql",
     database_backups_path="./databases/backups/",
-    logger=logging.getLogger("discord"),
+    logger=logging.getLogger(cd.__name__),
 )
 
 client = MyClient(

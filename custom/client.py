@@ -1,3 +1,9 @@
+"""
+Custom module for a Discord client.
+
+`discord.py >= 2.0.0` or a fork with `discord.ext.commands.Bot` is required.
+"""
+
 from __future__ import annotations
 
 import discord
@@ -8,10 +14,12 @@ import os
 import logging
 import colorama
 from colorama import Fore, Back, Style
+import glob
 
 from .database import DatabaseManager
 
-DSLOGGER = logging.getLogger("discord")
+LOGGER = logging.getLogger(__name__)
+colorama.init()
 
 
 class MyClient(Bot):
@@ -39,7 +47,7 @@ class MyClient(Bot):
         database_manager: DatabaseManager,
         extensions_folders: List[str],
         is_testing: bool = False,
-        test_guild: Optional[Type[discord.Object]] = None,
+        test_guild: Optional[discord.Object] = None,
         **options: Any,
     ) -> None:
         # Constructor-required
@@ -55,34 +63,64 @@ class MyClient(Bot):
     async def setup_hook(self) -> None:
 
         for folder in self.extensions_folders:
-            for extension in [
-                file.replace(".py", "")
-                for file in os.listdir(folder)
-                if os.path.isfile(os.path.join(folder, file))
-            ]:
+            for file_path in glob.glob(os.path.join(folder, "*.py")):
+
+                extension = os.path.basename(file_path).replace(".py", "")
                 await self.load_extension(f"{folder}.{extension}")
-                DSLOGGER.log(logging.INFO, f"Loaded {folder}.{extension}")
 
-        if self.is_testing and self.TEST_GUILD is not None:
-            DSLOGGER.log(logging.WARN, "The bot is in testing mode.")
-            print(f"{Fore.BLACK}{Back.RED}The bot is in testing mode.{Style.RESET_ALL}")
-            self.tree.copy_global_to(guild=self.TEST_GUILD)
+                LOGGER.log(logging.INFO, f"Loaded {folder}.{extension}")
 
-        elif self.is_testing and self.TEST_GUILD is None:
-            raise TypeError(
-                "Missing 'TEST_GUILD' parameter. Please make 'is_testing' False or provide a 'TEST_GUILD' parameter."
-            )
+        self.check_testing()
 
-        elif not self.is_testing and self.TEST_GUILD is not None:
-            raise TypeError(
-                "Unnecessary 'TEST_GUILD' parameter. Please make 'is_testing' True or make 'TEST_GUILD' None."
-            )
+        await self.tree.sync(guild=self.TEST_GUILD if self.is_testing else None)
 
-        await self.tree.sync(guild=self.TEST_GUILD)
-        DSLOGGER.log(logging.INFO, "Synced commands.")
+        LOGGER.log(logging.INFO, "Synced commands.")
         print(f"{Fore.GREEN}Synced commands{Style.RESET_ALL}")
 
+    def check_testing(self) -> None:
+        """Checks whether the bot should be in testing mode or not.
+
+        Raises:
+            `IncompleteTestingError`: Raised if the testing parameters are incomplete/missing.
+        """
+
+        if self.is_testing and self.TEST_GUILD is not None:
+            self.tree.copy_global_to(guild=self.TEST_GUILD)
+
+            LOGGER.log(logging.WARN, "The bot is in testing mode.")
+            print(f"{Fore.BLACK}{Back.RED}The bot is in testing mode.{Style.RESET_ALL}")
+
+        elif self.is_testing and self.TEST_GUILD is None:
+            raise IncompleteTestingError(1)
+
+        elif not self.is_testing and self.TEST_GUILD is not None:
+            raise IncompleteTestingError(2)
+
     async def close(self) -> None:
-        DSLOGGER.log(logging.WARN, "The bot has been turned off.")
+        LOGGER.log(logging.WARN, "The bot has been turned off.")
         print(f"{Fore.WHITE}{Back.RED}The bot has been turned off.{Style.RESET_ALL}")
         return await super().close()
+
+
+class IncompleteTestingError(Exception):
+    """Bot testing setup error.
+
+    Args:
+        `option` (`int`, optional): 1 or 2, the message to display. Defaults to 0 (generic message).
+
+    Message formats:
+        `option = 1`: Missing 'TEST_GUILD' parameter. Please make 'is_testing' False or provide a 'TEST_GUILD' parameter.
+
+        `option = 2`: Unnecessary 'TEST_GUILD' parameter. Please make 'is_testing' True or make 'TEST_GUILD' None.
+    """
+
+    def __init__(self, option: int = 0) -> None:
+        self.option = option
+
+    def __str__(self) -> str:
+        if self.option == 1:
+            return "Missing 'TEST_GUILD' parameter. Please make 'is_testing' False or provide a 'TEST_GUILD' parameter."
+        elif self.option == 2:
+            return "Unnecessary 'TEST_GUILD' parameter. Please make 'is_testing' True or make 'TEST_GUILD' None."
+        else:
+            return "Something went wrong but wasn't specified."

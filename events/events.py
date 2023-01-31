@@ -12,7 +12,7 @@ import os
 from custom.client import MyClient
 
 colorama.init()
-DSLOGGER = logging.getLogger("discord")
+LOGGER = logging.getLogger(__name__)
 
 
 class Events(commands.Cog):
@@ -22,7 +22,7 @@ class Events(commands.Cog):
     @commands.Cog.listener()
     async def on_ready(self):
 
-        DSLOGGER.log(logging.INFO, f"Logged in as {self.bot.user}")
+        LOGGER.log(logging.INFO, f"Logged in as {self.bot.user}")
         print(
             f"{Fore.CYAN}Logged in as {Fore.BLACK}{Back.CYAN}{self.bot.user}{Style.RESET_ALL}"
         )
