@@ -15,47 +15,54 @@ All [the assets][assets] used for this bot are made using AI.
 - [DALL-E 2][dall-e]
 - [Pixel It][pixelit]
 
-## ⚙️ How to install (Windows)
+## 🚀 Usage
 
-1. Install the [Microsoft C++ Build Tools][vstools]
+This bot provides an RPG adventure game experience on Discord. The game can be played by users on a Discord server.
 
-2. Install [Git][git]
+## ⚙️ Installation (Windows)
 
-3. Clone this repository
+Follow these steps to install the bot on your Windows machine:
 
-```shell
+1. Install the [Microsoft C++ Build Tools][vstools].
+2. Install [Git][git].
+3. Clone this repository by running the following command in your terminal:
+
+```bash
 git clone https://github.com/madkarmaa/rpg-discord-bot.git
 ```
 
-4. Use the `cd` command to head over to the directory where you cloned the repository
+4. Go to the directory where you cloned the repository:
 
-```shell
+```bash
 cd C:\path\to\rpg-discord-bot-whateverBranch
 ```
 
-5. Create a Python environment
+5. Create a Python environment:
 
-```shell
+```bash
 python -m venv your-environment-name
 ```
 
-6. Install the bot dependencies
+6. Activate the environment using the following command:
 
-```shell
+```bash
+your-environment-name\Scripts\activate.bat
+```
+
+7. Install the dependencies by running the following command:
+
+```bash
 pip install -r requirements.txt
 ```
 
-7. Create a file called `.env` in the same directory as `main.py`
+8. Create a file named `.env` in the same directory as `main.py` by running the following commands:
 
-```shell
+```bash
 cd . > .env
-```
-
-```shell
 notepad .env
 ```
 
-8. Write the following in the file and save it
+9. Add the following content to the `.env` file and save it:
 
 ```ini
 TOKEN=
@@ -66,9 +73,9 @@ TEST_GUILD=
 
 `TEST_GUILD` should be the ID of the server you want to test the bot in.
 
-9. Start `main.py`
+10. Start the bot by running the following command:
 
-```shell
+```bash
 python main.py
 ```
 
