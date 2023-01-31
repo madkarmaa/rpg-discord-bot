@@ -45,18 +45,28 @@ python -m venv your-environment-name
 pip install -r requirements.txt
 ```
 
-7. Create a file called `.env` in the same directory as `main.py` and complete it like the following
+7. Create a file called `.env` in the same directory as `main.py`
+
+```shell
+cd . > .env
+```
+
+```shell
+notepad .env
+```
+
+8. Write the following in the file and save it
 
 ```ini
 TOKEN=
 TEST_GUILD=
 ```
 
-`TOKEN` sould be your bot's token (get one in the [Discord Developer Portal][dev-portal])
+`TOKEN` sould be your bot's token (get one in the [Discord Developer Portal][dev-portal]).
 
-`TEST_GUILD` should be the ID of the server you want to test the bot in
+`TEST_GUILD` should be the ID of the server you want to test the bot in.
 
-8. Start `main.py`
+9. Start `main.py`
 
 ```shell
 python main.py
