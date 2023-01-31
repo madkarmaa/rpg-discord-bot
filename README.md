@@ -23,42 +23,42 @@ All [the assets][assets] used for this bot are made using AI.
 
 3. Clone this repository
 
-```bash
+```shell
 git clone https://github.com/madkarmaa/rpg-discord-bot.git
 ```
 
 4. Use the `cd` command to head over to the directory where you cloned the repository
 
-```bash
+```shell
 cd C:\path\to\rpg-discord-bot-whateverBranch
 ```
 
 5. Create a Python environment
 
-```bash
+```shell
 python -m venv your-environment-name
 ```
 
 6. Install the bot dependencies
 
-```bash
+```shell
 pip install -r requirements.txt
 ```
 
 7. Create a file called `.env` in the same directory as `main.py` and complete it like the following
 
-```
+```ini
 TOKEN=
 TEST_GUILD=
 ```
 
 `TOKEN` sould be your bot's token (get one in the [Discord Developer Portal][dev-portal])
 
-`TEST_GUILD` should be the ID of the server you want to test the bot on.
+`TEST_GUILD` should be the ID of the server you want to test the bot in
 
 8. Start `main.py`
 
-```bash
+```shell
 python main.py
 ```
 
