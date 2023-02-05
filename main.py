@@ -30,7 +30,6 @@ mg = DatabaseManager(
     "./databases/test.db",
     database_schema_path="./databases/schemas/schema.sql",
     database_backups_path="./databases/backups/",
-    logger=logging.getLogger(cd.__name__),
 )
 
 client = MyClient(

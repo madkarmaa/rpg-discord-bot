@@ -12,10 +12,9 @@ from colorama import Fore, Back, Style
 import os
 import shutil
 import glob
-from typing import Type, Any, Optional, List, Dict, Union
+from typing import Any, Optional, List, Dict, Union
 import logging
 import datetime
-import traceback
 from contextlib import asynccontextmanager, _AsyncGeneratorContextManager
 
 
@@ -40,7 +39,8 @@ class DatabaseManager:
             os.path.normpath(database_backups_path) if database_backups_path else None
         )
 
-        self.LOGGER = self.check_logging(logger)
+        self.logger = self.get_logger_instance(logger)
+        self.logging_setup()
 
         self.is_connected: bool = False
         self.connection = None
@@ -55,14 +55,14 @@ class DatabaseManager:
         if self.is_connected:
             await self.disconnect()
 
-    def check_logging(
+    def get_logger_instance(
         self, logger: Optional[Union[logging.Logger, str]] = None
     ) -> Optional[logging.Logger]:
         """`Method`\n
         Adds a logger.
 
         Args:
-            `logger` (`Optional[Union[logging.Logger, str]]`): The logger. It can be either the `logger.Logger` instance or the name of the logger. If `NoneType`, prints to console. Defaults to `None`.
+            `logger` (`Optional[Union[logging.Logger, str]]`): The logger. It can be either the `logger.Logger` instance or the name of the logger. If `NoneType`, uses `__class__.__name__`. Defaults to `None`.
 
         Raises:
             `TypeError`: Raised if the `logger` parameter type isn't `logging.Logger`, `str` or `NoneType`.
@@ -72,12 +72,11 @@ class DatabaseManager:
 
         Example:
         ```python
-        check_logging('my_logger')
+        get_logger_instance('my_logger')
         ```
         """
         if logger is None:
-            print(f"{Fore.WHITE}{Back.RED}LOGGING TO CONSOLE.{Style.RESET_ALL}")
-            return None
+            return logging.getLogger(self.__class__.__name__)
         elif isinstance(logger, str):
             return logging.getLogger(logger)
         elif isinstance(logger, logging.Logger):
@@ -87,6 +86,43 @@ class DatabaseManager:
                 f"Logger should be of type {logging.Logger}, {str} or NoneType, got {type(logger)}"
             )
 
+    def logging_setup(
+        self,
+        level: Optional[int] = None,
+        handler: Optional[logging.Handler] = None,
+        formatter: Optional[logging.Formatter] = None,
+    ) -> None:
+        """`Method`\n
+        Personalised version of logging.basicConfig method.
+
+        Args:
+            `level` (`Optional[int]`, optional): The level of the logger. Defaults to `logging.INFO`.
+
+            `handler` (`Optional[logging.Handler]`, optional): The handler of the logger. Defaults to `logging.StreamHandler`.
+
+            `formatter` (`Optional[logging.Formatter]`, optional): The formatter of the logger.
+
+        Example:
+        ```python
+        logging_setup(level=logging.DEBUG, handler=logging.FileHandler(**params))
+        ```
+        """
+        if level is None:
+            level = logging.INFO
+
+        if handler is None:
+            handler = logging.StreamHandler()
+
+        if formatter is None:
+            dt_fmt: str = r"%Y-%m-%d %H:%M:%S"
+            formatter = logging.Formatter(
+                "[{asctime}] [{levelname}] {name}: {message}", datefmt=dt_fmt, style="{"
+            )
+
+        handler.setFormatter(formatter)
+        self.logger.setLevel(level)
+        self.logger.addHandler(handler)
+
     def log(
         self,
         message: str,
@@ -94,49 +130,18 @@ class DatabaseManager:
         level: Optional[int] = None,
         error: Optional[Exception] = None,
     ) -> None:
-        """`Method`\n
-        Logs a message.
 
-        Args:
-            `message` (`str`): The message to log.
+        if level == logging.ERROR:
+            self.logger.log(
+                level,
+                message,
+                exc_info=(type(error), error, error.__traceback__)
+                if error is not None
+                else None,
+            )
+            return
 
-            `level` (`int`, optional): The severity level of the log message. Defaults to `None`.
-
-            `error` (`Exception`, optional): The exception that you can provide when `level` is `logging.ERROR`. Defaults to `None`.
-
-        Example:
-        ```python
-        log("This is a warning.", level=logging.WARNING)
-        ```
-        """
-        right_now = datetime.datetime.now()
-        right_now = right_now.strftime(r"[%H-%M-%S]")
-
-        if self.LOGGER is not None:
-
-            if level == logging.ERROR:
-                self.LOGGER.log(
-                    level,
-                    message,
-                    exc_info=(type(error), error, error.__traceback__)
-                    if error is not None
-                    else None,
-                )
-
-            else:
-                self.LOGGER.log(level=level, msg=message)
-
-        else:
-
-            if error is not None:
-                print(
-                    f"{Fore.RED}{right_now}: {Fore.WHITE}{Back.RED}{message}{Back.RESET}{Fore.RED}"
-                )
-                traceback.print_exception(type(error), error, error.__traceback__)
-                print(Style.RESET_ALL)
-
-            else:
-                print(f"{Fore.GREEN}{right_now}{Style.RESET_ALL}: {message}")
+        self.logger.log(msg=message, level=level)
 
     async def connect(self) -> aiosqlite.Connection:
         """`Coro`\n
