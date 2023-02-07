@@ -107,6 +107,9 @@ class DatabaseManager:
         logging_setup(level=logging.DEBUG, handler=logging.FileHandler(**params))
         ```
         """
+        for _logger in self.logger.handlers:
+            self.logger.removeHandler(_logger)
+
         if level is None:
             level = logging.INFO
 
@@ -127,10 +130,24 @@ class DatabaseManager:
         self,
         message: str,
         *,
-        level: Optional[int] = None,
+        level: int = logging.INFO,
         error: Optional[Exception] = None,
     ) -> None:
+        """`Method`\n
+        Log a message (specific to this class)
 
+        Args:
+            `message` (`str`): The message to log.
+
+            `level` (`int`, optional): The level of the log message. Defaults to `logging.INFO`.
+
+            `error` (`Optional[Exception]`, optional): The exception to embed with a ERROR level log message. Defaults to None.
+
+        Example:
+        ```python
+        log("This is a warning!", level=logging.WARNING)
+        ```
+        """
         if level == logging.ERROR:
             self.logger.log(
                 level,
@@ -171,7 +188,6 @@ class DatabaseManager:
             return conn
 
         except aiosqlite.Error as e:
-            print(f"Error connecting to the database: {e}")
             self.is_connected = False
 
             self.log("Error connecting to the database.", level=logging.ERROR, error=e)
