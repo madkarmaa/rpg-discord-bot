@@ -93,7 +93,7 @@ class DatabaseManager:
         formatter: Optional[logging.Formatter] = None,
     ) -> None:
         """`Method`\n
-        Personalised version of logging.basicConfig method.
+        Personalised version of `logging.basicConfig` method.
 
         Args:
             `level` (`Optional[int]`, optional): The level of the logger. Defaults to `logging.INFO`.
