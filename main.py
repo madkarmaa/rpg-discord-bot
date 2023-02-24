@@ -9,11 +9,16 @@ from os import environ
 from pyfiglet import figlet_format
 from discord.ext import commands
 from discord.utils import setup_logging
+import colorama
+from colorama import Fore, Back, Style
 
 from custom.client import MyClient
 from custom.database import DatabaseManager
 
 load_dotenv()
+colorama.init()
+
+print(Fore.MAGENTA + figlet_format("RPG") + Style.RESET_ALL)
 
 rightNow = datetime.datetime.now()
 rightNow = rightNow.strftime(r"%d-%m-%Y_%H-%M-%S")
